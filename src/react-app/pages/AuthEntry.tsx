@@ -39,12 +39,7 @@ export const AuthEntry: React.FC = () => {
 
   return (
     <div className="auth-entry">
-      {/* Guest Navigation (when guest session is active) */}
-      {isSessionActive && currentView === 'selection' && (
-        <div className="guest-navigation">
-          <p>You have an active guest session</p>
-        </div>
-      )}
+
       
       {/* User Type Selection */}
       {currentView === 'selection' && (

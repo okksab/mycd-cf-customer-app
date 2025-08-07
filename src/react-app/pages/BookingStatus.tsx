@@ -60,6 +60,11 @@ export const BookingStatus: React.FC = () => {
   return (
     <div className="booking-status">
       <div className="status-header">
+        <div className="logo-container">
+          <img src="/logo.png" alt="MyCallDriver" className="brand-logo" onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }} />
+        </div>
         <div className="status-icon">✅</div>
         <h1>Booking Confirmed!</h1>
         <p>Your driver has been assigned</p>
@@ -149,6 +154,7 @@ export const BookingStatus: React.FC = () => {
           height: 60px;
           max-width: 200px;
           object-fit: contain;
+          filter: drop-shadow(0 2px 8px rgba(0,0,0,0.1));
         }
 
         .loading-spinner {
@@ -297,12 +303,12 @@ export const BookingStatus: React.FC = () => {
         }
 
         .btn-primary {
-          background: #003B71;
+          background: linear-gradient(135deg, #F28C00 0%, #e6741d 100%);
           color: white;
         }
 
         .btn-primary:hover {
-          background: #002a5c;
+          background: linear-gradient(135deg, #e6741d 0%, #d1661a 100%);
           transform: translateY(-1px);
         }
 

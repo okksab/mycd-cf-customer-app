@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useGuestStore } from '../stores/guestStore';
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GuestLeadForm } from './GuestLeadForm';
 
 interface GuestFlowProps {
@@ -8,23 +8,25 @@ interface GuestFlowProps {
 }
 
 export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
-  const { currentStep, isLoading, error, initiateGuestSession, verifyGuestOTP, initGuestSession } = useGuestStore();
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   
   const [formData, setFormData] = useState({
+    mobile: '',
     firstName: '',
     lastName: '',
-    mobile: ''
+    location: ''
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
+  const [otpDigits, setOtpDigits] = useState(['1', '2', '3', '4', '5', '6']); // Prefilled for testing
   const otpInputs = useRef<(HTMLInputElement | null)[]>([]);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const canProceed = formData.firstName.trim() && 
-                    formData.lastName.trim() && 
-                    /^[6-9]\d{9}$/.test(formData.mobile);
+  const canProceedMobile = /^[6-9]\d{9}$/.test(formData.mobile);
+  const canProceedDetails = formData.firstName.trim() && 
+                           formData.lastName.trim() && 
+                           formData.location.trim();
 
   const maskedMobile = formData.mobile ? 
                       formData.mobile.slice(0, 6) + 'XXXX' : '';
@@ -32,54 +34,42 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
   const isValidOTP = otpDigits.every(digit => digit !== '') &&
                      otpDigits.join('').length === 6;
 
-  useEffect(() => {
-    initGuestSession();
-  }, [initGuestSession]);
 
-  useEffect(() => {
-    if (currentStep === 2) {
-      startTimer();
-    }
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [currentStep]);
 
-  const validateForm = () => {
+  const validateMobile = () => {
     const newErrors: Record<string, string> = {};
-    
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    }
-    
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-    }
-    
     if (!formData.mobile) {
       newErrors.mobile = 'Mobile number is required';
     } else if (!/^[6-9]\d{9}$/.test(formData.mobile)) {
       newErrors.mobile = 'Enter valid 10-digit mobile number';
     }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const proceedToVerification = async () => {
-    if (!validateForm()) return;
-    
-    try {
-      await initiateGuestSession({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        mobile: formData.mobile
-      });
-    } catch (error) {
-      console.error('Guest flow error:', error);
+  const validateDetails = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
     }
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    }
+    if (!formData.location.trim()) {
+      newErrors.location = 'City or pincode is required';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const proceedToOTP = async () => {
+    if (!validateMobile()) return;
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      setCurrentStep(2);
+    }, 1000);
   };
 
   const onOtpInput = (index: number, value: string) => {
@@ -116,66 +106,112 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
 
   const verifyOTPHandler = async () => {
     if (!isValidOTP) return;
-    
-    try {
-      const otp = otpDigits.join('');
-      await verifyGuestOTP(formData.mobile, otp);
-      stopTimer();
-    } catch (error) {
-      // Clear OTP on error
-      setOtpDigits(['', '', '', '', '', '']);
-      setTimeout(() => {
-        otpInputs.current[0]?.focus();
-      }, 0);
-    }
-  };
-
-  const startTimer = () => {
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          if (timerRef.current) {
-            clearInterval(timerRef.current);
-          }
-          return 0;
-        }
-        return prev - 1;
-      });
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      setCurrentStep(3);
     }, 1000);
   };
 
-  const stopTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
+  const proceedToLeadForm = async () => {
+    if (!validateDetails()) return;
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      setCurrentStep(4);
+    }, 1000);
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const completeLeadForm = () => {
+    // Navigate to booking status
+    navigate('/booking-status');
   };
 
-  const goBackToOTP = () => {
-    // Reset OTP and go back to step 2
-    setOtpDigits(['', '', '', '', '', '']);
-    useGuestStore.setState({ currentStep: 2 });
-    startTimer();
-  };
+
 
   return (
     <div className="guest-flow">
       <div className="flow-header">
         <button onClick={onBack} className="back-btn">← Back</button>
-        <h2>🚗 Guest Booking</h2>
+        <div className="logo-container">
+          <img src="/logo.png" alt="MyCallDriver" className="brand-logo" onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }} />
+        </div>
+        <h2>Guest Booking</h2>
         <p>Quick booking without account creation</p>
       </div>
 
-      {/* Step 1: Mobile & Name Input */}
+      {/* Step 1: Mobile Number */}
       {currentStep === 1 && (
         <div className="step-card">
-          <h3>📱 Enter Your Details</h3>
+          <h3>📱 Enter Mobile Number</h3>
+          <p>We'll send you an OTP to verify your number</p>
+          
+          <div className="form-group">
+            <label>Mobile Number</label>
+            <input 
+              value={formData.mobile}
+              onChange={(e) => setFormData(prev => ({ ...prev, mobile: e.target.value }))}
+              type="tel" 
+              className={`form-input ${errors.mobile ? 'error' : ''}`}
+              placeholder="10-digit mobile number"
+              maxLength={10}
+            />
+            {errors.mobile && <span className="error-text">{errors.mobile}</span>}
+          </div>
+
+          <button 
+            onClick={proceedToOTP}
+            disabled={!canProceedMobile || isLoading}
+            className="btn btn-primary"
+          >
+            {isLoading ? '📤 Sending OTP...' : '📱 Send OTP'}
+          </button>
+        </div>
+      )}
+
+      {/* Step 2: OTP Verification */}
+      {currentStep === 2 && (
+        <div className="step-card">
+          <h3>📱 Verify Mobile Number</h3>
+          <p>We've sent a 6-digit OTP to <strong>{maskedMobile}</strong></p>
+          
+          <div className="otp-input-group">
+            {otpDigits.map((digit, index) => (
+              <input
+                key={index}
+                ref={el => otpInputs.current[index] = el}
+                value={digit}
+                type="text"
+                className="otp-digit"
+                maxLength={1}
+                onChange={(e) => onOtpInput(index, e.target.value)}
+                onKeyDown={(e) => onOtpKeyDown(index, e)}
+              />
+            ))}
+          </div>
+
+          <div className="otp-timer">OTP: 123456 (Pre-filled for testing)</div>
+
+          <button 
+            onClick={verifyOTPHandler}
+            disabled={!isValidOTP || isLoading}
+            className="btn btn-primary"
+          >
+            {isLoading ? '🔄 Verifying...' : '✅ Verify OTP'}
+          </button>
+        </div>
+      )}
+
+      {/* Step 3: Personal Details */}
+      {currentStep === 3 && (
+        <div className="step-card">
+          <h3>👤 Personal Details</h3>
+          <p>Please provide your details to continue</p>
+          
           <div className="form-row">
             <div className="form-group">
               <label>First Name</label>
@@ -202,64 +238,30 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
           </div>
           
           <div className="form-group">
-            <label>Mobile Number</label>
+            <label>City or Pincode</label>
             <input 
-              value={formData.mobile}
-              onChange={(e) => setFormData(prev => ({ ...prev, mobile: e.target.value }))}
-              type="tel" 
-              className={`form-input ${errors.mobile ? 'error' : ''}`}
-              placeholder="10-digit mobile number"
-              maxLength={10}
+              value={formData.location}
+              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+              type="text" 
+              className={`form-input ${errors.location ? 'error' : ''}`}
+              placeholder="Enter city name or pincode"
             />
-            {errors.mobile && <span className="error-text">{errors.mobile}</span>}
+            {errors.location && <span className="error-text">{errors.location}</span>}
           </div>
 
           <button 
-            onClick={proceedToVerification}
-            disabled={!canProceed || isLoading}
+            onClick={proceedToLeadForm}
+            disabled={!canProceedDetails || isLoading}
             className="btn btn-primary"
           >
-            {isLoading ? '📤 Processing...' : '📱 Continue'}
+            {isLoading ? '📤 Processing...' : '🚗 Continue to Booking'}
           </button>
         </div>
       )}
 
-      {/* Step 2: OTP Verification */}
-      {currentStep === 2 && (
-        <div className="step-card">
-          <h3>📱 Verify Mobile Number</h3>
-          <p>We've sent a 6-digit OTP to <strong>{maskedMobile}</strong></p>
-          
-          <div className="otp-input-group">
-            {otpDigits.map((digit, index) => (
-              <input
-                key={index}
-                ref={el => otpInputs.current[index] = el}
-                value={digit}
-                type="text"
-                className="otp-digit"
-                maxLength={1}
-                onChange={(e) => onOtpInput(index, e.target.value)}
-                onKeyDown={(e) => onOtpKeyDown(index, e)}
-              />
-            ))}
-          </div>
-
-          <div className="otp-timer">Valid for {formatTime(timeLeft)}</div>
-
-          <button 
-            onClick={verifyOTPHandler}
-            disabled={!isValidOTP || isLoading}
-            className="btn btn-primary"
-          >
-            {isLoading ? '🔄 Verifying...' : '✅ Verify OTP'}
-          </button>
-        </div>
-      )}
-
-      {/* Step 3: Lead Form */}
-      {currentStep === 3 && (
-        <GuestLeadForm onBack={goBackToOTP} onComplete={onComplete} />
+      {/* Step 4: Lead Form */}
+      {currentStep === 4 && (
+        <GuestLeadForm onBack={() => setCurrentStep(3)} onComplete={completeLeadForm} />
       )}
 
       <style jsx="true">{`
@@ -289,6 +291,20 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
 
         .back-btn:hover {
           color: #374151;
+        }
+
+        .logo-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 1rem;
+        }
+
+        .brand-logo {
+          height: 80px;
+          max-width: 200px;
+          object-fit: contain;
+          filter: drop-shadow(0 2px 8px rgba(0,0,0,0.1));
         }
 
         .flow-header h2 {
@@ -412,13 +428,13 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
         }
 
         .btn-primary {
-          background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+          background: linear-gradient(135deg, #F28C00 0%, #e6741d 100%);
           color: white;
         }
 
         .btn-primary:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+          box-shadow: 0 4px 12px rgba(242, 140, 0, 0.3);
         }
 
         @media (max-width: 480px) {

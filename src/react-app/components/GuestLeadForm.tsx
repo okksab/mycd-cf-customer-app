@@ -101,16 +101,14 @@ export const GuestLeadForm: React.FC<GuestLeadFormProps> = ({ onBack, onComplete
     
     try {
       // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       const result = {
         requestId: `REQ-${Date.now()}`,
         status: 'submitted'
       };
       
-      setShowPreview(false);
-      navigate(`/booking-status/${result.requestId}`);
-      onComplete?.(result);
+      onComplete?.();
     } catch (error) {
       console.error('Submit error:', error);
       setError('Failed to submit request. Please try again.');
@@ -120,7 +118,7 @@ export const GuestLeadForm: React.FC<GuestLeadFormProps> = ({ onBack, onComplete
   return (
     <div className="guest-lead-form">
       <div className="form-header">
-        <h3>🚗 Trip Details</h3>
+        <h3>Trip Details</h3>
         <p>Complete your booking request</p>
       </div>
 
@@ -230,11 +228,10 @@ export const GuestLeadForm: React.FC<GuestLeadFormProps> = ({ onBack, onComplete
         <div className="form-actions">
           <button 
             type="button"
-            onClick={handlePreview}
-            disabled={!canPreview}
+            onClick={onBack}
             className="btn btn-secondary"
           >
-            👁️ Preview Request
+            ← Back
           </button>
           
           <button 
@@ -243,7 +240,7 @@ export const GuestLeadForm: React.FC<GuestLeadFormProps> = ({ onBack, onComplete
             disabled={!canSubmit || isLoading}
             className="btn btn-primary"
           >
-            {isLoading ? '🔄 Submitting...' : '🚗 Submit Request'}
+            {isLoading ? '🔄 Submitting...' : '🚗 Book Now'}
           </button>
         </div>
       </form>
