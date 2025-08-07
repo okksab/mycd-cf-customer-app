@@ -1,0 +1,98 @@
+.lead-form-page {
+  padding: 2rem;
+  background: #f7f7f7;
+  min-height: 100vh;
+}
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  padding: 2rem;
+}
+.app-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.app-header p {
+  color: #888;
+  margin-bottom: 1.5rem;
+}
+.selection-card {
+  padding: 1.5rem;
+  border-radius: 8px;
+  background: #f0f4ff;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+}
+.selection-btn {
+  display: flex;
+  align-items: center;
+  background: #e3f2fd;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.selection-btn:hover {
+  background: #bbdefb;
+}
+.btn-icon {
+  font-size: 2rem;
+  margin-right: 1rem;
+}
+.btn-content h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.btn-content p {
+  margin: 0.2rem 0 0.5rem 0;
+  color: #666;
+}
+.btn-features span {
+  display: block;
+  font-size: 0.95rem;
+  color: #444;
+}
+.btn-arrow {
+  margin-left: auto;
+  font-size: 1.5rem;
+}
+.social-login-section {
+  margin-top: 1.5rem;
+}
+.social-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.social-header p {
+  margin: 0.2rem 0 0.5rem 0;
+  color: #888;
+}
+.social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.social-btn {
+  background: #ececec;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  cursor: not-allowed;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.social-btn.mobile-btn {
+  background: #e3f2fd;
+  color: #1976d2;
+  cursor: pointer;
+}
+.social-btn.mobile-btn:disabled {
+  cursor: not-allowed;
+}

@@ -1,65 +1,57 @@
-// src/App.tsx
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuthStore } from './stores/authStore';
+import { AuthEntry } from './pages/AuthEntry';
+import LeadForm from './pages/LeadForm';
+import { Dashboard } from './pages/Dashboard';
+import { DashboardHome } from './pages/DashboardHome';
+import { DashboardBook } from './pages/DashboardBook';
+import { DashboardHistory } from './pages/DashboardHistory';
+import { DashboardNotifications } from './pages/DashboardNotifications';
+import { DashboardProfile } from './pages/DashboardProfile';
+import { BookingStatus } from './pages/BookingStatus';
+import { GuestHistory } from './pages/GuestHistory';
+import './styles/globals.css';
 
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import cloudflareLogo from "./assets/Cloudflare_Logo.svg";
-import honoLogo from "./assets/hono.svg";
-import "./App.css";
+// Protected Route Component
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuthStore();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/" replace />;
+};
 
 function App() {
-  const [count, setCount] = useState(0);
-  const [name, setName] = useState("unknown");
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-        <a href="https://hono.dev/" target="_blank">
-          <img src={honoLogo} className="logo cloudflare" alt="Hono logo" />
-        </a>
-        <a href="https://workers.cloudflare.com/" target="_blank">
-          <img
-            src={cloudflareLogo}
-            className="logo cloudflare"
-            alt="Cloudflare logo"
-          />
-        </a>
+    <Router>
+      <div className="app">
+        <main className="app-main">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<AuthEntry />} />
+              <Route path="/lead-form" element={<LeadForm />} />
+            <Route path="/booking-status" element={<BookingStatus />} />
+            <Route path="/booking-status/:id" element={<BookingStatus />} />
+            <Route path="/guest-history" element={<GuestHistory />} />
+            
+            {/* Protected Dashboard Routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }>
+              <Route index element={<Navigate to="/dashboard/home" replace />} />
+              <Route path="home" element={<DashboardHome />} />
+              <Route path="book" element={<DashboardBook />} />
+              <Route path="history" element={<DashboardHistory />} />
+              <Route path="notifications" element={<DashboardNotifications />} />
+              <Route path="profile" element={<DashboardProfile />} />
+            </Route>
+            
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
       </div>
-      <h1>Vite + React + Hono + Cloudflare</h1>
-      <div className="card">
-        <button
-          onClick={() => setCount((count) => count + 1)}
-          aria-label="increment"
-        >
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <div className="card">
-        <button
-          onClick={() => {
-            fetch("/api/")
-              .then((res) => res.json() as Promise<{ name: string }>)
-              .then((data) => setName(data.name));
-          }}
-          aria-label="get name"
-        >
-          Name from API is: {name}
-        </button>
-        <p>
-          Edit <code>worker/index.ts</code> to change the name
-        </p>
-      </div>
-      <p className="read-the-docs">Click on the logos to learn more</p>
-    </>
+    </Router>
   );
 }
 

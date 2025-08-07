@@ -1,0 +1,494 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../stores/authStore';
+
+interface Request {
+  request_id: string;
+  from_location: string;
+  to_location?: string;
+  status: string;
+  created_at: string;
+  service_category?: string;
+  service_category_name?: string;
+}
+
+export const RecentRequestsCarousel: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const [recentRequests, setRecentRequests] = useState<Request[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Mock recent requests
+  const mockRequests: Request[] = [
+    {
+      request_id: 'REQ-2024-001',
+      from_location: 'MG Road, Bangalore',
+      to_location: 'Palace Grounds, Bangalore',
+      status: 'completed',
+      created_at: '2024-12-15T10:30:00Z',
+      service_category_name: 'Wedding Event'
+    },
+    {
+      request_id: 'REQ-2024-002',
+      from_location: 'Koramangala, Bangalore',
+      to_location: 'Kempegowda Airport',
+      status: 'completed',
+      created_at: '2024-12-10T14:20:00Z',
+      service_category_name: 'Airport Transfer'
+    },
+    {
+      request_id: 'REQ-2024-003',
+      from_location: 'Electronic City',
+      to_location: 'Whitefield',
+      status: 'cancelled',
+      created_at: '2024-12-08T09:15:00Z',
+      service_category_name: 'Daily Commute'
+    }
+  ];
+
+  // Display requests with Load More card
+  const displayRequests = [...recentRequests, { isLoadMore: true }];
+
+  useEffect(() => {
+    const loadRecentRequests = async () => {
+      try {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setRecentRequests(mockRequests);
+      } catch (error) {
+        console.error('Failed to load recent requests:', error);
+        setRecentRequests([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadRecentRequests();
+  }, []);
+
+  const getStatusIcon = (status: string) => {
+    const icons: Record<string, string> = {
+      completed: '✅',
+      pending: '⏳',
+      cancelled: '❌',
+      in_progress: '🚗',
+      assigned: '👤',
+      confirmed: '✅'
+    };
+    return icons[status] || '📋';
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const nextSlide = () => {
+    if (currentIndex < displayRequests.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  };
+
+  const prevSlide = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const goToHistory = () => {
+    navigate('/dashboard/history');
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="recent-requests">
+        <h3>Recent Requests</h3>
+        <div className="loading-state">
+          <div className="loading-spinner">🔄</div>
+          <p>Loading recent requests...</p>
+        </div>
+
+        <style jsx="true">{`
+          .recent-requests {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+          }
+
+          .recent-requests h3 {
+            margin: 0 0 1rem 0;
+            color: #003B71;
+            font-size: 1.1rem;
+            font-weight: 600;
+          }
+
+          .loading-state {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+          }
+
+          .loading-spinner {
+            font-size: 1.5rem;
+            animation: spin 1s linear infinite;
+            margin-bottom: 0.5rem;
+          }
+
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  if (recentRequests.length === 0) {
+    return (
+      <div className="recent-requests">
+        <h3>Recent Requests</h3>
+        <div className="empty-state">
+          <div className="empty-icon">📭</div>
+          <p>No recent requests found</p>
+        </div>
+
+        <style jsx="true">{`
+          .recent-requests {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+          }
+
+          .recent-requests h3 {
+            margin: 0 0 1rem 0;
+            color: #003B71;
+            font-size: 1.1rem;
+            font-weight: 600;
+          }
+
+          .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+          }
+
+          .empty-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  return (
+    <div className="recent-requests">
+      <h3>Recent Requests</h3>
+      
+      <div className="carousel-container">
+        <div className="carousel-wrapper">
+          <div 
+            className="carousel-track" 
+            style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+          >
+            {displayRequests.map((request: any, index) => (
+              <div key={request.request_id || 'load-more'} className="carousel-slide">
+                {request.isLoadMore ? (
+                  <div className="load-more-card" onClick={goToHistory}>
+                    <div className="load-more-icon">📝</div>
+                    <div className="load-more-text">Load More</div>
+                    <div className="load-more-subtitle">View all requests</div>
+                  </div>
+                ) : (
+                  <div className="request-card">
+                    <div className="request-header">
+                      <div className={`request-status ${request.status}`}>
+                        {getStatusIcon(request.status)} {request.status.toUpperCase()}
+                      </div>
+                      <div className="request-date">{formatDate(request.created_at)}</div>
+                    </div>
+                    
+                    <div className="request-route">
+                      <div className="route-point">
+                        <span className="route-icon">📍</span>
+                        <span className="route-text">{request.from_location}</span>
+                      </div>
+                      <div className="route-arrow">↓</div>
+                      <div className="route-point">
+                        <span className="route-icon">🎯</span>
+                        <span className="route-text">{request.to_location || 'Not specified'}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="request-info">
+                      <span className="request-id">#{request.request_id}</span>
+                      <span className="service-type">{request.service_category_name || request.service_category}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="carousel-controls">
+          <button 
+            onClick={prevSlide}
+            disabled={currentIndex === 0}
+            className="carousel-btn prev-btn"
+          >
+            ‹
+          </button>
+          
+          <div className="carousel-indicators">
+            {displayRequests.map((_, index) => (
+              <span 
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`indicator ${currentIndex === index ? 'active' : ''}`}
+              />
+            ))}
+          </div>
+          
+          <button 
+            onClick={nextSlide}
+            disabled={currentIndex === displayRequests.length - 1}
+            className="carousel-btn next-btn"
+          >
+            ›
+          </button>
+        </div>
+      </div>
+
+      <style jsx="true">{`
+        .recent-requests {
+          background: white;
+          border-radius: 12px;
+          padding: 1rem;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          margin-bottom: 1rem;
+        }
+
+        .recent-requests h3 {
+          margin: 0 0 1rem 0;
+          color: #003B71;
+          font-size: 1.1rem;
+          font-weight: 600;
+        }
+
+        .carousel-container {
+          position: relative;
+        }
+
+        .carousel-wrapper {
+          overflow: hidden;
+          border-radius: 8px;
+        }
+
+        .carousel-track {
+          display: flex;
+          transition: transform 0.3s ease;
+        }
+
+        .carousel-slide {
+          min-width: 100%;
+          flex-shrink: 0;
+        }
+
+        .request-card {
+          background: #f8f9fa;
+          border-radius: 8px;
+          padding: 1rem;
+          border: 1px solid #e9ecef;
+        }
+
+        .request-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.75rem;
+        }
+
+        .request-status {
+          padding: 0.25rem 0.5rem;
+          border-radius: 12px;
+          font-size: 0.7rem;
+          font-weight: 600;
+        }
+
+        .request-status.completed {
+          background: rgba(40, 167, 69, 0.1);
+          color: #28a745;
+        }
+
+        .request-status.pending {
+          background: rgba(255, 193, 7, 0.1);
+          color: #ffc107;
+        }
+
+        .request-status.cancelled {
+          background: rgba(220, 53, 69, 0.1);
+          color: #dc3545;
+        }
+
+        .request-date {
+          font-size: 0.75rem;
+          color: #666;
+        }
+
+        .request-route {
+          margin-bottom: 0.75rem;
+        }
+
+        .route-point {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.25rem;
+        }
+
+        .route-icon {
+          font-size: 0.8rem;
+        }
+
+        .route-text {
+          font-size: 0.8rem;
+          color: #333;
+          flex: 1;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .route-arrow {
+          text-align: center;
+          color: #666;
+          font-size: 0.8rem;
+          margin: 0.25rem 0;
+        }
+
+        .request-info {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .request-id {
+          font-size: 0.75rem;
+          color: #666;
+          font-family: monospace;
+        }
+
+        .service-type {
+          font-size: 0.75rem;
+          color: #F58220;
+          font-weight: 500;
+        }
+
+        .load-more-card {
+          background: linear-gradient(135deg, #F58220 0%, #e6741d 100%);
+          color: white;
+          border-radius: 8px;
+          padding: 2rem 1rem;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 120px;
+        }
+
+        .load-more-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(245, 130, 32, 0.3);
+        }
+
+        .load-more-icon {
+          font-size: 2rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .load-more-text {
+          font-size: 1rem;
+          font-weight: 600;
+          margin-bottom: 0.25rem;
+        }
+
+        .load-more-subtitle {
+          font-size: 0.8rem;
+          opacity: 0.9;
+        }
+
+        .carousel-controls {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 1rem;
+          padding: 0 0.5rem;
+        }
+
+        .carousel-btn {
+          background: #F58220;
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 1.2rem;
+          transition: all 0.2s ease;
+          font-family: inherit;
+        }
+
+        .carousel-btn:hover:not(:disabled) {
+          background: #e6741d;
+          transform: scale(1.1);
+        }
+
+        .carousel-btn:disabled {
+          background: #ccc;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .carousel-indicators {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .indicator {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #ccc;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .indicator.active {
+          background: #F58220;
+          transform: scale(1.2);
+        }
+      `}</style>
+    </div>
+  );
+};
