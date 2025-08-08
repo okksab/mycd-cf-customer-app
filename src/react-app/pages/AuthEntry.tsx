@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
-import { useGuestStore } from '../stores/guestStore';
-import { GuestFlow } from '../components/GuestFlow';
 
 export const AuthEntry: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, features, error, clearError, initAuth } = useAuthStore();
-  const { isSessionActive } = useGuestStore();
   
-  const [currentView, setCurrentView] = useState<'selection' | 'guest' | 'register-mobile' | 'login'>('selection');
-  const [activeTab, setActiveTab] = useState<'guest' | 'account'>('guest');
+  const [currentView, setCurrentView] = useState<'selection' | 'register-mobile' | 'login'>('selection');
+  const [activeTab, setActiveTab] = useState<'account'>('account');
 
   useEffect(() => {
     initAuth();
@@ -28,15 +25,6 @@ export const AuthEntry: React.FC = () => {
     clearError();
   };
 
-  const onGuestComplete = () => {
-    // Guest completed lead submission
-    console.log('Guest flow completed');
-  };
-
-  if (currentView === 'guest') {
-    return <GuestFlow onBack={goBack} onComplete={onGuestComplete} />;
-  }
-
   return (
     <div className="auth-entry">
 
@@ -53,57 +41,10 @@ export const AuthEntry: React.FC = () => {
             </div>
           </div>
 
-          {/* Tab Navigation */}
-          <div className="tab-navigation">
-            <button 
-              onClick={() => setActiveTab('guest')}
-              className={`tab-btn ${activeTab === 'guest' ? 'active' : ''}`}
-            >
-              Guest Mode
-            </button>
-            <button 
-              onClick={() => setActiveTab('account')}
-              className={`tab-btn ${activeTab === 'account' ? 'active' : ''}`}
-            >
-              Account Login
-            </button>
-          </div>
 
-          {/* Tab Content */}
+
+          {/* Account Login Content */}
           <div className="tab-content">
-            {/* Guest Mode Tab */}
-            {activeTab === 'guest' && (
-              <div className="tab-panel guest-panel">
-                <div className="panel-header">
-                  <h3>Quick Booking</h3>
-                  <p>Book a driver instantly without creating an account</p>
-                </div>
-                
-                {features.guestMode && (
-                  <button className="primary-btn guest-btn" onClick={() => selectFlow('guest')}>
-                    <div className="btn-icon">🚗</div>
-                    <span>Continue as Guest</span>
-                  </button>
-                )}
-                
-                <div className="features-list">
-                  <div className="feature-item">
-                    <span className="feature-icon">✓</span>
-                    <span>One-time booking</span>
-                  </div>
-                  <div className="feature-item">
-                    <span className="feature-icon">✓</span>
-                    <span>Mobile verification</span>
-                  </div>
-                  <div className="feature-item">
-                    <span className="feature-icon">✓</span>
-                    <span>Instant service</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Account Login Tab */}
             {activeTab === 'account' && (
               <div className="tab-panel account-panel">
                 <div className="panel-header">

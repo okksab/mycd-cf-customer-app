@@ -1,17 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGuestStore } from '../stores/guestStore';
-import { GuestLeadForm } from './GuestLeadForm';
-import { GuestDashboard } from './GuestDashboard';
+import { useCustomerStore } from '../stores/customerStore';
+import { CustomerLeadForm } from './CustomerLeadForm';
+import { CustomerDashboard } from './CustomerDashboard';
 
-interface GuestFlowProps {
+interface CustomerFlowProps {
   onBack: () => void;
   onComplete: () => void;
 }
 
-export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
+export const CustomerFlow: React.FC<CustomerFlowProps> = ({ onBack, onComplete }) => {
   const navigate = useNavigate();
-  const { isSessionActive, initGuestSession, initiateGuestSession, verifyGuestOTP, guestData, addRequest } = useGuestStore();
+  const { isSessionActive, initCustomerSession, initiateCustomerSession, verifyCustomerOTP, customerData, addRequest } = useCustomerStore();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,12 +25,12 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
   const otpInputs = useRef<(HTMLInputElement | null)[]>([]);
   
   React.useEffect(() => {
-    initGuestSession();
-  }, [initGuestSession]);
+    initCustomerSession();
+  }, [initCustomerSession]);
   
   // If session is active, show dashboard
   if (isSessionActive) {
-    return <GuestDashboard />;
+    return <CustomerDashboard />;
   }
 
   const canProceedMobile = /^[6-9]\d{9}$/.test(formData.mobile);
@@ -77,7 +77,7 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
     setIsLoading(true);
     
     try {
-      await initiateGuestSession({
+      await initiateCustomerSession({
         firstName: '',
         lastName: '',
         mobile: formData.mobile,
@@ -128,7 +128,7 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
     setIsLoading(true);
     
     try {
-      await verifyGuestOTP(formData.mobile, otpDigits.join(''));
+      await verifyCustomerOTP(formData.mobile, otpDigits.join(''));
       setCurrentStep(3);
     } catch (error) {
       console.error('Failed to verify OTP:', error);
@@ -141,11 +141,11 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
     if (!validateDetails()) return;
     setIsLoading(true);
     
-    // Update guest data locally
-    if (guestData) {
-      guestData.firstName = formData.firstName;
-      guestData.lastName = formData.lastName;
-      guestData.location = formData.location;
+    // Update customer data locally
+    if (customerData) {
+      customerData.firstName = formData.firstName;
+      customerData.lastName = formData.lastName;
+      customerData.location = formData.location;
     }
     
     setCurrentStep(4);
@@ -174,7 +174,7 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
 
 
   return (
-    <div className="guest-flow">
+    <div className="customer-flow">
       <div className="flow-header">
         <button onClick={onBack} className="back-btn">← Back</button>
         <div className="logo-container">
@@ -182,8 +182,8 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
             (e.target as HTMLImageElement).style.display = 'none';
           }} />
         </div>
-        <h2>Guest Booking</h2>
-        <p>Quick booking without account creation</p>
+        <h2>Customer Booking</h2>
+        <p>Book your ride with mobile verification</p>
       </div>
 
       {/* Step 1: Mobile Number */}
@@ -303,11 +303,11 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
 
       {/* Step 4: Lead Form */}
       {currentStep === 4 && (
-        <GuestLeadForm onBack={() => setCurrentStep(3)} onComplete={completeLeadForm} />
+        <CustomerLeadForm onBack={() => setCurrentStep(3)} onComplete={completeLeadForm} />
       )}
 
       <style jsx="true">{`
-        .guest-flow {
+        .customer-flow {
           max-width: 500px;
           margin: 0 auto;
           padding: 1rem;
@@ -480,7 +480,7 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
         }
 
         @media (max-width: 480px) {
-          .guest-flow {
+          .customer-flow {
             padding: 0.5rem;
           }
           

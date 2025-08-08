@@ -3,6 +3,7 @@ interface EnvironmentConfig {
   environment: 'local' | 'dev' | 'production';
   debug: boolean;
   mockOTP: boolean;
+  guestMode: boolean;
 }
 
 // SET ACTIVE PROFILE HERE
@@ -19,18 +20,21 @@ const environmentConfigs: Record<'local' | 'dev' | 'production', EnvironmentConf
     environment: 'local',
     debug: true,
     mockOTP: true,
+    guestMode: false,
   },
   dev: {
     apiBaseUrl: 'https://api-dev.mycalldriver.com',
     environment: 'dev',
     debug: true,
     mockOTP: false,
+    guestMode: false,
   },
   production: {
     apiBaseUrl: 'https://api.mycalldriver.com',
     environment: 'production',
     debug: false,
     mockOTP: false,
+    guestMode: false,
   },
 };
 

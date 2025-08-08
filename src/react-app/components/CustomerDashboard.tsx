@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGuestStore } from '../stores/guestStore';
-import { GuestLeadForm } from './GuestLeadForm';
+import { useCustomerStore } from '../stores/customerStore';
+import { CustomerLeadForm } from './CustomerLeadForm';
 
-export const GuestDashboard: React.FC = () => {
+export const CustomerDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { guestData, requests, clearGuestSession } = useGuestStore();
+  const { customerData, requests, clearCustomerSession } = useCustomerStore();
   const [activeTab, setActiveTab] = useState<'booking' | 'history' | 'offers' | 'profile'>('booking');
 
   const handleLogout = () => {
-    clearGuestSession();
+    clearCustomerSession();
     navigate('/');
   };
 
@@ -19,7 +19,7 @@ export const GuestDashboard: React.FC = () => {
   };
 
   return (
-    <div className="guest-dashboard">
+    <div className="customer-dashboard">
       <div className="dashboard-header">
         <div className="logo-container">
           <img src="/logo.png" alt="MyCallDriver" className="brand-logo" onError={(e) => {
@@ -27,8 +27,8 @@ export const GuestDashboard: React.FC = () => {
           }} />
         </div>
         <div className="user-info">
-          <h2>Welcome, {guestData?.firstName}!</h2>
-          <p>Guest User • {guestData?.mobile}</p>
+          <h2>Welcome, {customerData?.firstName}!</h2>
+          <p>Customer • {customerData?.mobile}</p>
         </div>
         <button onClick={handleLogout} className="logout-btn">Logout</button>
       </div>
@@ -36,7 +36,7 @@ export const GuestDashboard: React.FC = () => {
       <div className="dashboard-content">
         {activeTab === 'booking' && (
           <div className="tab-content">
-            <GuestLeadForm 
+            <CustomerLeadForm 
               onComplete={() => {
                 // After booking completion, switch to history tab
                 setActiveTab('history');
@@ -115,11 +115,11 @@ export const GuestDashboard: React.FC = () => {
                 <h4>Personal Information</h4>
                 <div className="info-row">
                   <span className="label">Name:</span>
-                  <span className="value">{guestData?.firstName} {guestData?.lastName}</span>
+                  <span className="value">{customerData?.firstName} {customerData?.lastName}</span>
                 </div>
                 <div className="info-row">
                   <span className="label">Mobile:</span>
-                  <span className="value">{guestData?.mobile}</span>
+                  <span className="value">{customerData?.mobile}</span>
                 </div>
                 <div className="info-row">
                   <span className="label">Status:</span>
@@ -128,8 +128,8 @@ export const GuestDashboard: React.FC = () => {
               </div>
 
               <div className="upgrade-section">
-                <h4>🔁 Upgrade to Registered Customer</h4>
-                <p>Unlock premium features:</p>
+                <h4>🔁 Complete Registration</h4>
+                <p>Complete your profile for full access:</p>
                 <ul className="benefits-list">
                   <li>✓ Complete Trip History</li>
                   <li>✓ Wallet Top-up</li>
@@ -138,7 +138,7 @@ export const GuestDashboard: React.FC = () => {
                   <li>✓ Priority Support</li>
                 </ul>
                 <button onClick={handleUpgrade} className="btn btn-primary upgrade-btn">
-                  Upgrade Now
+                  Complete Registration
                 </button>
               </div>
             </div>
@@ -178,7 +178,7 @@ export const GuestDashboard: React.FC = () => {
       </div>
 
       <style jsx="true">{`
-        .guest-dashboard {
+        .customer-dashboard {
           min-height: 100vh;
           background: #f8f9fa;
           display: flex;

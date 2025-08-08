@@ -9,62 +9,81 @@ class ApiService {
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     const defaultHeaders = {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'X-Request-ID': requestId,
     };
 
-    const response = await fetch(url, {
-      ...options,
-      mode: 'cors',
-      headers: {
-        ...defaultHeaders,
-        ...options.headers,
-      },
+    console.log(`[API Request] ${requestId} ${options.method || 'GET'} ${url}`, {
+      endpoint,
+      method: options.method || 'GET',
+      headers: { ...defaultHeaders, ...options.headers },
+      body: options.body
     });
 
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
+    try {
+      const response = await fetch(url, {
+        ...options,
+        mode: 'cors',
+        headers: {
+          ...defaultHeaders,
+          ...options.headers,
+        },
+      });
 
-    return response.json();
+      const responseData = await response.text();
+      
+      console.log(`[API Response] ${requestId} ${response.status} ${response.statusText}`, {
+        endpoint,
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+        body: responseData
+      });
+
+      if (!response.ok) {
+        const error = new Error(`API Error: ${response.status} ${response.statusText}`);
+        console.error(`[API Error] ${requestId}`, {
+          endpoint,
+          method: options.method || 'GET',
+          status: response.status,
+          statusText: response.statusText,
+          responseBody: responseData,
+          requestBody: options.body,
+          traceId: requestId
+        });
+        throw error;
+      }
+
+      return responseData ? JSON.parse(responseData) : {};
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('API Error:')) {
+        throw error; // Re-throw API errors with existing context
+      }
+      
+      // Network or other errors
+      console.error(`[Network Error] ${requestId}`, {
+        endpoint,
+        method: options.method || 'GET',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        traceId: requestId
+      });
+      throw new Error(`Network Error: Failed to connect to ${endpoint} (Trace: ${requestId})`);
+    }
   }
 
   // Guest API methods
   async sendOTP(mobile: string) {
-    if (config.mockOTP) {
-      // Mock OTP for testing
-      return new Promise(resolve => {
-        setTimeout(() => {
-          resolve({ success: true, message: 'OTP sent successfully' });
-        }, 1000);
-      });
-    }
-    
-    return this.request('/api/guest/send-otp', {
+    return this.request('/api/v1/auth/otp/send', {
       method: 'POST',
       body: JSON.stringify({ mobile }),
     });
   }
 
   async verifyOTP(mobile: string, otp: string) {
-    if (config.mockOTP) {
-      // Mock OTP verification with 123456
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (otp === '123456') {
-            resolve({ success: true, message: 'OTP verified successfully' });
-          } else {
-            reject(new Error('Invalid OTP'));
-          }
-        }, 1000);
-      });
-    }
-    
-    return this.request('/api/guest/verify-otp', {
+    return this.request('/api/v1/auth/otp/verify', {
       method: 'POST',
       body: JSON.stringify({ mobile, otp }),
     });
@@ -86,7 +105,7 @@ class ApiService {
   }
 
   async validateCustomer(mobile: string, deviceFingerprint: string) {
-    return this.request('/api/auth/mobile/check', {
+    return this.request('/api/v1/auth/mobile/check', {
       method: 'POST',
       body: JSON.stringify({ mobile, deviceFingerprint }),
     });
@@ -107,6 +126,35 @@ class ApiService {
     return this.request('/api/customer/create', {
       method: 'POST',
       body: JSON.stringify(customerData),
+    });
+  }
+
+  async verifyOTPEnhanced(mobile: string, otp: string) {
+    return this.request('/api/v1/auth/enhanced/otp/verify', {
+      method: 'POST',
+      body: JSON.stringify({ mobile, otp }),
+    });
+  }
+
+  async loginWithPin(mobile: string, pin: string) {
+    return this.request('/api/v1/auth/login-pin', {
+      method: 'POST',
+      body: JSON.stringify({ mobile, pin }),
+    });
+  }
+
+  async saveUserDetails(mobile: string, details: any) {
+    return this.request('/api/v1/auth/save-details', {
+      method: 'POST',
+      body: JSON.stringify({ mobile, ...details }),
+    });
+  }
+
+  // PIN setup is now handled in saveUserDetails
+  async setupPin(mobile: string, pin: string) {
+    return this.request('/api/v1/auth/setup-pin', {
+      method: 'POST',
+      body: JSON.stringify({ mobile, pin }),
     });
   }
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-interface GuestBooking {
+interface CustomerBooking {
   id: string;
   requestId: string;
   service: string;
@@ -12,8 +12,8 @@ interface GuestBooking {
   amount?: number;
 }
 
-export const GuestHistory: React.FC = () => {
-  const [bookings, setBookings] = useState<GuestBooking[]>([]);
+export const CustomerHistory: React.FC = () => {
+  const [bookings, setBookings] = useState<CustomerBooking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export const GuestHistory: React.FC = () => {
       setBookings([
         {
           id: '1',
-          requestId: 'GUEST-2024-001',
+          requestId: 'CUST-2024-001',
           service: 'Airport Transfer',
           fromLocation: 'Koramangala, Bangalore',
           toLocation: 'Kempegowda Airport',
@@ -32,7 +32,7 @@ export const GuestHistory: React.FC = () => {
         },
         {
           id: '2',
-          requestId: 'GUEST-2024-002',
+          requestId: 'CUST-2024-002',
           service: 'Wedding Event',
           fromLocation: 'MG Road, Bangalore',
           toLocation: 'Palace Grounds',
@@ -55,7 +55,7 @@ export const GuestHistory: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="guest-history loading">
+      <div className="customer-history loading">
         <div className="loading-spinner"></div>
         <p>Loading your bookings...</p>
       </div>
@@ -63,7 +63,7 @@ export const GuestHistory: React.FC = () => {
   }
 
   return (
-    <div className="guest-history">
+    <div className="customer-history">
       <div className="history-header">
         <div className="logo-container">
           <img src="/logo.png" alt="MyCallDriver" className="brand-logo" onError={(e) => {
@@ -71,7 +71,7 @@ export const GuestHistory: React.FC = () => {
           }} />
         </div>
         <h1>Your Bookings</h1>
-        <p>View your guest booking history</p>
+        <p>View your booking history</p>
       </div>
 
       {bookings.length === 0 ? (
@@ -151,24 +151,24 @@ export const GuestHistory: React.FC = () => {
         </div>
       )}
 
-      <div className="guest-actions">
+      <div className="customer-actions">
         <Link to="/" className="btn btn-primary">
           Book Another Ride
         </Link>
         <button className="btn btn-secondary">
-          Create Account
+          View Profile
         </button>
       </div>
 
       <style jsx="true">{`
-        .guest-history {
+        .customer-history {
           max-width: 800px;
           margin: 0 auto;
           padding: 2rem 1rem;
           min-height: 100vh;
         }
 
-        .guest-history.loading {
+        .customer-history.loading {
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -369,7 +369,7 @@ export const GuestHistory: React.FC = () => {
           margin: 0 0 1.5rem 0;
         }
 
-        .guest-actions {
+        .customer-actions {
           display: flex;
           gap: 1rem;
           justify-content: center;
@@ -411,7 +411,7 @@ export const GuestHistory: React.FC = () => {
         }
 
         @media (max-width: 480px) {
-          .guest-history {
+          .customer-history {
             padding: 1rem 0.5rem;
           }
           
@@ -442,7 +442,7 @@ export const GuestHistory: React.FC = () => {
             text-align: center;
           }
           
-          .guest-actions {
+          .customer-actions {
             flex-direction: column;
           }
         }

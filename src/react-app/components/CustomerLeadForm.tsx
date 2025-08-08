@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGuestStore } from '../stores/guestStore';
+import { useCustomerStore } from '../stores/customerStore';
 import { LocationInput } from './LocationInput';
 import { ServiceSelector } from './ServiceSelector';
 
-interface GuestLeadFormProps {
+interface CustomerLeadFormProps {
   onBack?: () => void;
   onComplete?: (result: any) => void;
 }
 
-export const GuestLeadForm: React.FC<GuestLeadFormProps> = ({ onBack, onComplete }) => {
+export const CustomerLeadForm: React.FC<CustomerLeadFormProps> = ({ onBack, onComplete }) => {
   const navigate = useNavigate();
-  const { guestData, isLoading, error, setError } = useGuestStore();
+  const { customerData, isLoading, error, setError } = useCustomerStore();
   
   const [formData, setFormData] = useState({
     fromLocation: '',
@@ -114,8 +114,8 @@ export const GuestLeadForm: React.FC<GuestLeadFormProps> = ({ onBack, onComplete
         amount: Math.floor(Math.random() * 1000) + 500
       };
       
-      // Add to guest store
-      const { addRequest } = useGuestStore.getState();
+      // Add to customer store
+      const { addRequest } = useCustomerStore.getState();
       addRequest(request);
       
       // Navigate to booking status
@@ -128,7 +128,7 @@ export const GuestLeadForm: React.FC<GuestLeadFormProps> = ({ onBack, onComplete
   };
 
   return (
-    <div className="guest-lead-form">
+    <div className="customer-lead-form">
       <div className="form-header">
         <h3>Trip Details</h3>
         <p>Complete your booking request</p>
@@ -269,11 +269,11 @@ export const GuestLeadForm: React.FC<GuestLeadFormProps> = ({ onBack, onComplete
             <div className="preview-details">
               <div className="preview-row">
                 <span className="label">Customer:</span>
-                <span className="value">{guestData?.firstName} {guestData?.lastName}</span>
+                <span className="value">{customerData?.firstName} {customerData?.lastName}</span>
               </div>
               <div className="preview-row">
                 <span className="label">Mobile:</span>
-                <span className="value">{guestData?.mobile}</span>
+                <span className="value">{customerData?.mobile}</span>
               </div>
               <div className="preview-row">
                 <span className="label">From:</span>
@@ -322,7 +322,7 @@ export const GuestLeadForm: React.FC<GuestLeadFormProps> = ({ onBack, onComplete
       )}
 
       <style jsx="true">{`
-        .guest-lead-form {
+        .customer-lead-form {
           max-width: 600px;
           margin: 0 auto;
           padding: 1rem;
@@ -592,7 +592,7 @@ export const GuestLeadForm: React.FC<GuestLeadFormProps> = ({ onBack, onComplete
         }
 
         @media (max-width: 768px) {
-          .guest-lead-form {
+          .customer-lead-form {
             padding: 0.5rem;
           }
           

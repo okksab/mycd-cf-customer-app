@@ -1,52 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useGuestStore } from '../stores/guestStore';
+import { useCustomerStore } from '../stores/customerStore';
+import apiService from '../services/apiService';
 
 export const BookingStatus: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { getRequestById } = useCustomerStore();
   const [booking, setBooking] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadBooking = () => {
+    const loadBooking = async () => {
       try {
-        // Try to get booking from guest store first
-        const { getRequestById } = useGuestStore.getState();
-        const guestRequest = id ? getRequestById(id) : null;
+        // First check customerStore for local data
+        const localRequest = id ? getRequestById(id) : null;
         
-        if (guestRequest) {
+        if (localRequest) {
           setBooking({
-            id: guestRequest.requestId,
-            service: guestRequest.service,
-            fromLocation: guestRequest.fromLocation,
-            toLocation: guestRequest.toLocation,
-            status: guestRequest.status,
-            driverName: 'Rajesh Kumar',
-            driverPhone: '+91 98765 43210',
-            vehicleNumber: 'KA 01 AB 1234',
-            estimatedArrival: '2024-12-15T10:30:00Z',
-            amount: guestRequest.amount || 2500
+            id: localRequest.requestId,
+            service: localRequest.service,
+            fromLocation: localRequest.fromLocation,
+            toLocation: localRequest.toLocation,
+            status: localRequest.status,
+            amount: localRequest.amount
           });
-          setIsLoading(false);
-        } else {
-          // Mock API call for other bookings
-          setTimeout(() => {
-            setBooking({
-              id: id || 'REQ-2024-001',
-              service: 'Wedding Event',
-              fromLocation: 'MG Road, Bangalore',
-              toLocation: 'Palace Grounds, Bangalore',
-              status: 'confirmed',
-              driverName: 'Rajesh Kumar',
-              driverPhone: '+91 98765 43210',
-              vehicleNumber: 'KA 01 AB 1234',
-              estimatedArrival: '2024-12-15T10:30:00Z',
-              amount: 2500
-            });
-            setIsLoading(false);
-          }, 1000);
         }
+        
+        // Call backend API to get latest booking status
+        if (id) {
+          const response = await apiService.getLeadStatus(id);
+          if (response.success && response.data) {
+            setBooking(response.data);
+          }
+        }
+        
+        setIsLoading(false);
       } catch (error) {
         console.error('Error loading booking:', error);
         setIsLoading(false);
@@ -54,7 +43,7 @@ export const BookingStatus: React.FC = () => {
     };
     
     loadBooking();
-  }, [id]);
+  }, [id, getRequestById]);
 
   if (isLoading) {
     return (
