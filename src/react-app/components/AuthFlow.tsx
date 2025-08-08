@@ -16,14 +16,14 @@ export const AuthFlow: React.FC = () => {
   });
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
   const [generatedOTP, setGeneratedOTP] = useState('');
+  const [pinError, setPinError] = useState('');
   const otpInputs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleMobileSubmit = async () => {
     if (!/^[6-9]\d{9}$/.test(formData.mobile)) return;
     
     try {
-      const response = await register(formData.mobile);
-      setGeneratedOTP(response.otp);
+      await register(formData.mobile);
       setCurrentStep(2);
     } catch (error) {
       console.error('Registration failed:', error);
@@ -59,7 +59,17 @@ export const AuthFlow: React.FC = () => {
   };
 
   const handlePINSetup = async () => {
-    if (formData.pin !== formData.confirmPin || formData.pin.length !== 4) return;
+    setPinError('');
+    
+    if (formData.pin.length !== 4) {
+      setPinError('PIN must be 4 digits');
+      return;
+    }
+    
+    if (formData.pin !== formData.confirmPin) {
+      setPinError('PIN and Confirm PIN do not match');
+      return;
+    }
     
     try {
       await setupPIN(formData.mobile, formData.pin);
@@ -120,7 +130,6 @@ export const AuthFlow: React.FC = () => {
         <div className="auth-card">
           <h3>📱 Verify OTP</h3>
           <p>Enter the 6-digit OTP sent to {formData.mobile}</p>
-          <div className="otp-display">Test OTP: {generatedOTP}</div>
           
           <div className="otp-input-group">
             {otpDigits.map((digit, index) => (
@@ -214,6 +223,7 @@ export const AuthFlow: React.FC = () => {
               maxLength={4}
             />
           </div>
+          {pinError && <div className="pin-error-message">{pinError}</div>}
           <button
             onClick={handlePINSetup}
             disabled={formData.pin !== formData.confirmPin || formData.pin.length !== 4 || isLoading}
@@ -369,6 +379,16 @@ export const AuthFlow: React.FC = () => {
           border-radius: 8px;
           text-align: center;
           margin-top: 1rem;
+        }
+
+        .pin-error-message {
+          background: #fee2e2;
+          color: #dc2626;
+          padding: 0.75rem;
+          border-radius: 6px;
+          text-align: center;
+          margin-bottom: 1rem;
+          font-size: 0.9rem;
         }
 
         @media (max-width: 480px) {
