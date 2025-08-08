@@ -105,7 +105,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       // Setup PIN via backend
-      const response = await apiService.setupPin(mobile, pin);
+      const response = await apiService.setupPin(mobile, pin) as any;
       
       // Set user as authenticated with backend response
       const user = {
@@ -126,7 +126,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       // Login with PIN via backend
-      const response = await apiService.loginWithPin(mobile, pin);
+      const response = await apiService.loginWithPin(mobile, pin) as any;
       
       // Set user as authenticated with backend response
       const user = {

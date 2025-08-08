@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ServiceSelection {
   category: string;
@@ -13,7 +13,7 @@ interface ServiceSelectorProps {
   onSelectionChanged: (selection: ServiceSelection) => void;
 }
 
-export const ServiceSelector: React.FC<ServiceSelectorProps> = ({ onSelectionChanged }) => {
+export const ServiceSelector = ({ onSelectionChanged }: ServiceSelectorProps) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [selectedDuration, setSelectedDuration] = useState('');
@@ -121,18 +121,18 @@ export const ServiceSelector: React.FC<ServiceSelectorProps> = ({ onSelectionCha
     });
   };
 
-  const onCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const onCategoryChange = (e: any) => {
     setSelectedCategory(e.target.value);
     setSelectedSubcategory('');
     setSelectedDuration('');
   };
 
-  const onSubcategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const onSubcategoryChange = (e: any) => {
     setSelectedSubcategory(e.target.value);
     setSelectedDuration('');
   };
 
-  const onDurationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const onDurationChange = (e: any) => {
     setSelectedDuration(e.target.value);
   };
 
@@ -194,7 +194,7 @@ export const ServiceSelector: React.FC<ServiceSelectorProps> = ({ onSelectionCha
         </div>
       )}
 
-      <style jsx="true">{`
+      <style>{`
         .service-selector {
           display: flex;
           flex-direction: column;

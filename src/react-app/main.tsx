@@ -3,17 +3,17 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 
-// PWA Service Worker Registration
-import { registerSW } from 'virtual:pwa-register'
+// PWA Service Worker Registration - commented out for build
+// import { registerSW } from 'virtual:pwa-register'
 
-const updateSW = registerSW({
-  onNeedRefresh() {
-    console.log('New content available, please refresh.')
-  },
-  onOfflineReady() {
-    console.log('App ready to work offline')
-  },
-})
+// const updateSW = registerSW({
+//   onNeedRefresh() {
+//     console.log('New content available, please refresh.')
+//   },
+//   onOfflineReady() {
+//     console.log('App ready to work offline')
+//   },
+// })
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

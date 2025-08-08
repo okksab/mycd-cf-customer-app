@@ -80,7 +80,7 @@ export const useCustomerStore = create<CustomerState>((set, get) => ({
       const deviceFingerprint = generateDeviceFingerprint();
       
       // Check mobile registration status
-      const response = await apiService.validateCustomer(data.mobile, deviceFingerprint);
+      const response = await apiService.validateCustomer(data.mobile, deviceFingerprint) as any;
       
       if (response.success && response.data) {
         const checkResult = response.data;
@@ -138,7 +138,7 @@ export const useCustomerStore = create<CustomerState>((set, get) => ({
       const deviceFingerprint = get().deviceFingerprint || generateDeviceFingerprint();
       
       // Verify OTP with enhanced auth service
-      const response = await apiService.verifyOTPEnhanced(mobile, otp);
+      const response = await apiService.verifyOTPEnhanced(mobile, otp) as any;
       
       if (response.success && response.data) {
         const sessionExpiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
@@ -249,7 +249,7 @@ export const useCustomerStore = create<CustomerState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     try {
-      const response = await apiService.loginWithPin(mobile, pin);
+      const response = await apiService.loginWithPin(mobile, pin) as any;
       
       if (response.success && response.data) {
         const sessionExpiry = Date.now() + (30 * 24 * 60 * 60 * 1000);

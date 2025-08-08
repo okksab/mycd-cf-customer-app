@@ -1,30 +1,28 @@
 interface EnvironmentConfig {
   apiBaseUrl: string;
-  environment: 'local' | 'dev' | 'production';
+  environment: 'local' | 'test' | 'production';
   debug: boolean;
   mockOTP: boolean;
   guestMode: boolean;
 }
 
-// SET ACTIVE PROFILE HERE
-const ACTIVE_PROFILE: 'local' | 'dev' | 'production' = 'local';
-
-const getEnvironment = (): 'local' | 'dev' | 'production' => {
-  // Use ACTIVE_PROFILE instead of environment variables
-  return ACTIVE_PROFILE;
+const getEnvironment = (): 'local' | 'test' | 'production' => {
+  // Check Cloudflare environment variable first, then fallback to local
+  const env = process.env.REACT_APP_ENV as 'local' | 'test' | 'production';
+  return env || 'local';
 };
 
-const environmentConfigs: Record<'local' | 'dev' | 'production', EnvironmentConfig> = {
+const environmentConfigs: Record<'local' | 'test' | 'production', EnvironmentConfig> = {
   local: {
     apiBaseUrl: 'http://localhost:8081',
     environment: 'local',
     debug: true,
-    mockOTP: true,
+    mockOTP: false,
     guestMode: false,
   },
-  dev: {
-    apiBaseUrl: 'https://api-dev.mycalldriver.com',
-    environment: 'dev',
+  test: {
+    apiBaseUrl: 'https://api-test.mycalldriver.com',
+    environment: 'test',
     debug: true,
     mockOTP: false,
     guestMode: false,

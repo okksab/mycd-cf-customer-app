@@ -39,10 +39,10 @@
     "wrangler": "4.21.x"
   },
   "scripts": {
-    "build": "tsc -b && vite build",
-    "build:local": "cross-env VITE_PROFILE=local tsc -b && vite build",
-    "build:dev": "cross-env VITE_PROFILE=dev tsc -b && vite build",
-    "build:production": "cross-env VITE_PROFILE=production tsc -b && vite build",
+    "build": "cross-env REACT_APP_ENV=test vite build",
+    "build:local": "cross-env VITE_PROFILE=local vite build",
+    "build:dev": "cross-env VITE_PROFILE=dev vite build",
+    "build:production": "cross-env VITE_PROFILE=production vite build",
     "cf-typegen": "wrangler types",
     "check": "tsc && vite build && wrangler deploy --dry-run",
     "deploy": "wrangler deploy",

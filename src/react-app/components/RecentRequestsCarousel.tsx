@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 
@@ -12,7 +12,7 @@ interface Request {
   service_category_name?: string;
 }
 
-export const RecentRequestsCarousel: React.FC = () => {
+export const RecentRequestsCarousel = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const [recentRequests, setRecentRequests] = useState<Request[]>([]);
@@ -118,7 +118,7 @@ export const RecentRequestsCarousel: React.FC = () => {
           <p>Loading recent requests...</p>
         </div>
 
-        <style jsx="true">{`
+        <style>{`
           .recent-requests {
             background: white;
             border-radius: 12px;
@@ -164,7 +164,7 @@ export const RecentRequestsCarousel: React.FC = () => {
           <p>No recent requests found</p>
         </div>
 
-        <style jsx="true">{`
+        <style>{`
           .recent-requests {
             background: white;
             border-radius: 12px;
@@ -274,7 +274,7 @@ export const RecentRequestsCarousel: React.FC = () => {
         </div>
       </div>
 
-      <style jsx="true">{`
+      <style>{`
         .recent-requests {
           background: white;
           border-radius: 12px;
