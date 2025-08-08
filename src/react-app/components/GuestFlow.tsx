@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGuestStore } from '../stores/guestStore';
 import { GuestLeadForm } from './GuestLeadForm';
+import { GuestDashboard } from './GuestDashboard';
 
 interface GuestFlowProps {
   onBack: () => void;
@@ -9,19 +11,27 @@ interface GuestFlowProps {
 
 export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
   const navigate = useNavigate();
+  const { isSessionActive, initGuestSession, initiateGuestSession, verifyGuestOTP, guestData, addRequest } = useGuestStore();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  
   const [formData, setFormData] = useState({
     mobile: '',
     firstName: '',
     lastName: '',
     location: ''
   });
-  
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [otpDigits, setOtpDigits] = useState(['1', '2', '3', '4', '5', '6']); // Prefilled for testing
   const otpInputs = useRef<(HTMLInputElement | null)[]>([]);
+  
+  React.useEffect(() => {
+    initGuestSession();
+  }, [initGuestSession]);
+  
+  // If session is active, show dashboard
+  if (isSessionActive) {
+    return <GuestDashboard />;
+  }
 
   const canProceedMobile = /^[6-9]\d{9}$/.test(formData.mobile);
   const canProceedDetails = formData.firstName.trim() && 
@@ -65,11 +75,20 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
   const proceedToOTP = async () => {
     if (!validateMobile()) return;
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    
+    try {
+      await initiateGuestSession({
+        firstName: '',
+        lastName: '',
+        mobile: formData.mobile,
+        location: ''
+      });
       setCurrentStep(2);
-    }, 1000);
+    } catch (error) {
+      console.error('Failed to send OTP:', error);
+    }
+    
+    setIsLoading(false);
   };
 
   const onOtpInput = (index: number, value: string) => {
@@ -107,26 +126,49 @@ export const GuestFlow: React.FC<GuestFlowProps> = ({ onBack, onComplete }) => {
   const verifyOTPHandler = async () => {
     if (!isValidOTP) return;
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    
+    try {
+      await verifyGuestOTP(formData.mobile, otpDigits.join(''));
       setCurrentStep(3);
-    }, 1000);
+    } catch (error) {
+      console.error('Failed to verify OTP:', error);
+    }
+    
+    setIsLoading(false);
   };
 
   const proceedToLeadForm = async () => {
     if (!validateDetails()) return;
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setCurrentStep(4);
-    }, 1000);
+    
+    // Update guest data locally
+    if (guestData) {
+      guestData.firstName = formData.firstName;
+      guestData.lastName = formData.lastName;
+      guestData.location = formData.location;
+    }
+    
+    setCurrentStep(4);
+    setIsLoading(false);
   };
 
   const completeLeadForm = () => {
+    // Generate request and add to store
+    const request = {
+      id: Date.now().toString(),
+      requestId: `REQ-${Date.now()}`,
+      service: 'Driver Booking',
+      fromLocation: formData.fromLocation || 'Location not specified',
+      toLocation: formData.toLocation,
+      status: 'confirmed',
+      createdAt: new Date().toISOString(),
+      amount: Math.floor(Math.random() * 1000) + 500
+    };
+    
+    addRequest(request);
+    
     // Navigate to booking status
-    navigate('/booking-status');
+    navigate(`/booking-status/${request.requestId}`);
   };
 
 

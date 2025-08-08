@@ -1,0 +1,27 @@
+{
+  "name": "MyCallDriver - Professional Driver Booking",
+  "short_name": "MyCallDriver",
+  "description": "Professional driver booking made easy",
+  "theme_color": "#003B71",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "orientation": "portrait-primary",
+  "categories": ["travel", "transportation"],
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

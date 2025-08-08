@@ -103,11 +103,23 @@ export const GuestLeadForm: React.FC<GuestLeadFormProps> = ({ onBack, onComplete
       // Mock API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const result = {
+      const request = {
+        id: Date.now().toString(),
         requestId: `REQ-${Date.now()}`,
-        status: 'submitted'
+        service: getServiceDisplayName() || 'Driver Booking',
+        fromLocation: formData.fromLocation,
+        toLocation: formData.toLocation,
+        status: 'confirmed',
+        createdAt: new Date().toISOString(),
+        amount: Math.floor(Math.random() * 1000) + 500
       };
       
+      // Add to guest store
+      const { addRequest } = useGuestStore.getState();
+      addRequest(request);
+      
+      // Navigate to booking status
+      navigate(`/booking-status/${request.requestId}`);
       onComplete?.();
     } catch (error) {
       console.error('Submit error:', error);

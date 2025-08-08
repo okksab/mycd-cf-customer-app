@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(), 
     cloudflare(),
@@ -59,5 +59,8 @@ export default defineConfig({
         ]
       }
     })
-  ]
-});
+  ],
+  define: {
+    __PROFILE__: JSON.stringify(process.env.VITE_PROFILE || mode)
+  }
+}));

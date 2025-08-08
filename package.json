@@ -40,10 +40,17 @@
   },
   "scripts": {
     "build": "tsc -b && vite build",
+    "build:local": "cross-env VITE_PROFILE=local tsc -b && vite build",
+    "build:dev": "cross-env VITE_PROFILE=dev tsc -b && vite build",
+    "build:production": "cross-env VITE_PROFILE=production tsc -b && vite build",
     "cf-typegen": "wrangler types",
     "check": "tsc && vite build && wrangler deploy --dry-run",
     "deploy": "wrangler deploy",
+    "deploy:dev": "npm run build:dev && wrangler deploy",
+    "deploy:production": "npm run build:production && wrangler deploy",
     "dev": "vite",
+    "dev:local": "cross-env VITE_PROFILE=local vite",
+    "dev:dev": "cross-env VITE_PROFILE=dev vite",
     "lint": "eslint .",
     "preview": "npm run build && vite preview"
   },

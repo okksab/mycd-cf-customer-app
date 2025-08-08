@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useGuestStore } from '../stores/guestStore';
 
 export const BookingStatus: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -8,22 +9,51 @@ export const BookingStatus: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Mock API call to fetch booking status
-    setTimeout(() => {
-      setBooking({
-        id: id || 'REQ-2024-001',
-        service: 'Wedding Event',
-        fromLocation: 'MG Road, Bangalore',
-        toLocation: 'Palace Grounds, Bangalore',
-        status: 'confirmed',
-        driverName: 'Rajesh Kumar',
-        driverPhone: '+91 98765 43210',
-        vehicleNumber: 'KA 01 AB 1234',
-        estimatedArrival: '2024-12-15T10:30:00Z',
-        amount: 2500
-      });
-      setIsLoading(false);
-    }, 1000);
+    const loadBooking = () => {
+      try {
+        // Try to get booking from guest store first
+        const { getRequestById } = useGuestStore.getState();
+        const guestRequest = id ? getRequestById(id) : null;
+        
+        if (guestRequest) {
+          setBooking({
+            id: guestRequest.requestId,
+            service: guestRequest.service,
+            fromLocation: guestRequest.fromLocation,
+            toLocation: guestRequest.toLocation,
+            status: guestRequest.status,
+            driverName: 'Rajesh Kumar',
+            driverPhone: '+91 98765 43210',
+            vehicleNumber: 'KA 01 AB 1234',
+            estimatedArrival: '2024-12-15T10:30:00Z',
+            amount: guestRequest.amount || 2500
+          });
+          setIsLoading(false);
+        } else {
+          // Mock API call for other bookings
+          setTimeout(() => {
+            setBooking({
+              id: id || 'REQ-2024-001',
+              service: 'Wedding Event',
+              fromLocation: 'MG Road, Bangalore',
+              toLocation: 'Palace Grounds, Bangalore',
+              status: 'confirmed',
+              driverName: 'Rajesh Kumar',
+              driverPhone: '+91 98765 43210',
+              vehicleNumber: 'KA 01 AB 1234',
+              estimatedArrival: '2024-12-15T10:30:00Z',
+              amount: 2500
+            });
+            setIsLoading(false);
+          }, 1000);
+        }
+      } catch (error) {
+        console.error('Error loading booking:', error);
+        setIsLoading(false);
+      }
+    };
+    
+    loadBooking();
   }, [id]);
 
   if (isLoading) {
