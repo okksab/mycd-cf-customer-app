@@ -137,6 +137,11 @@ class ApiService {
     return this.request('/api/v1/vehicle-types');
   }
 
+  async generateLeadId(stateCode?: string) {
+    const params = stateCode ? `?stateCode=${encodeURIComponent(stateCode)}` : '';
+    return this.request(`/api/v1/generate-lead-id${params}`);
+  }
+
   async verifyOTPEnhanced(mobile: string, otp: string) {
     return this.request('/api/v1/auth/enhanced/otp/verify', {
       method: 'POST',

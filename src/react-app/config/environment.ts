@@ -4,6 +4,7 @@ interface EnvironmentConfig {
   debug: boolean;
   mockOTP: boolean;
   guestMode: boolean;
+  googleMapsApiKey: string;
 }
 
 const getEnvironment = (): 'local' | 'test' | 'production' => {
@@ -19,6 +20,7 @@ const environmentConfigs: Record<'local' | 'test' | 'production', EnvironmentCon
     debug: true,
     mockOTP: false,
     guestMode: false,
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
   },
   test: {
     apiBaseUrl: 'https://test-api.mycalldriver.com',
@@ -26,6 +28,7 @@ const environmentConfigs: Record<'local' | 'test' | 'production', EnvironmentCon
     debug: true,
     mockOTP: false,
     guestMode: false,
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
   },
   production: {
     apiBaseUrl: 'https://api.mycalldriver.com',
@@ -33,6 +36,7 @@ const environmentConfigs: Record<'local' | 'test' | 'production', EnvironmentCon
     debug: false,
     mockOTP: false,
     guestMode: false,
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
   },
 };
 
