@@ -8,7 +8,8 @@
     "enabled": true
   },
   "vars": {
-    "REACT_APP_ENV": "test"
+    "REACT_APP_ENV": "test",
+    "VITE_GOOGLE_MAPS_API_KEY": "your_google_maps_api_key_here"
   },
   "upload_source_maps": true,
   "assets": {
