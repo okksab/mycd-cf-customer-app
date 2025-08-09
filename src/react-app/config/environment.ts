@@ -7,8 +7,8 @@ interface EnvironmentConfig {
 }
 
 const getEnvironment = (): 'local' | 'test' | 'production' => {
-  // Check Cloudflare environment variable first, then fallback to local
-  const env = process.env.REACT_APP_ENV as 'local' | 'test' | 'production';
+  // Use import.meta.env for Vite instead of process.env
+  const env = import.meta.env.VITE_APP_ENV as 'local' | 'test' | 'production';
   return env || 'local';
 };
 
@@ -21,7 +21,7 @@ const environmentConfigs: Record<'local' | 'test' | 'production', EnvironmentCon
     guestMode: false,
   },
   test: {
-    apiBaseUrl: 'https://api-test.mycalldriver.com',
+    apiBaseUrl: 'https://test-api.mycalldriver.com',
     environment: 'test',
     debug: true,
     mockOTP: false,
@@ -38,5 +38,12 @@ const environmentConfigs: Record<'local' | 'test' | 'production', EnvironmentCon
 
 const currentEnvironment = getEnvironment();
 export const config = environmentConfigs[currentEnvironment];
+
+// Debug: Log the current configuration
+console.log('Environment Config:', {
+  currentEnvironment,
+  apiBaseUrl: config.apiBaseUrl,
+  debug: config.debug
+});
 
 export default config;

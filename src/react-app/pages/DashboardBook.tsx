@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ServiceSelector } from '../components/ServiceSelector';
 
 export const DashboardBook: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -63,74 +64,33 @@ export const DashboardBook: React.FC = () => {
             />
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Trip Type</label>
-              <select
-                className="form-input"
-                value={formData.tripType}
-                onChange={(e) => handleInputChange('tripType', e.target.value)}
-                required
-              >
-                <option value="LOCAL">Local</option>
-                <option value="OUTSTATION">Outstation</option>
-                <option value="DROP">Drop</option>
-                <option value="ROUNDTRIP">Round Trip</option>
-                <option value="HOURLY">Hourly</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Service Type</label>
-              <select
-                className="form-input"
-                value={formData.serviceType}
-                onChange={(e) => handleInputChange('serviceType', e.target.value)}
-                required
-              >
-                <option value="">Select service</option>
-                <option value="wedding">Wedding</option>
-                <option value="event">Event</option>
-                <option value="airport">Airport Transfer</option>
-                <option value="daily">Daily Commute</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
+          <div className="form-group">
+            <label>Trip Type</label>
+            <select
+              className="form-input"
+              value={formData.tripType}
+              onChange={(e) => handleInputChange('tripType', e.target.value)}
+              required
+            >
+              <option value="LOCAL">Local</option>
+              <option value="OUTSTATION">Outstation</option>
+              <option value="DROP">Drop</option>
+              <option value="ROUNDTRIP">Round Trip</option>
+              <option value="HOURLY">Hourly</option>
+            </select>
           </div>
         </div>
 
         {/* Service Category Section */}
         <div className="form-section">
-          <h3>🚙 Service Category</h3>
+          <h3>🚙 Service Selection</h3>
           
-          <div className="service-categories">
-            <div 
-              className={`category-card ${formData.serviceCategory === 'economy' ? 'selected' : ''}`}
-              onClick={() => handleInputChange('serviceCategory', 'economy')}
-            >
-              <div className="category-icon">🚗</div>
-              <h4>Economy</h4>
-              <p>Budget-friendly option</p>
-            </div>
-
-            <div 
-              className={`category-card ${formData.serviceCategory === 'premium' ? 'selected' : ''}`}
-              onClick={() => handleInputChange('serviceCategory', 'premium')}
-            >
-              <div className="category-icon">🚙</div>
-              <h4>Premium</h4>
-              <p>Comfortable ride</p>
-            </div>
-
-            <div 
-              className={`category-card ${formData.serviceCategory === 'luxury' ? 'selected' : ''}`}
-              onClick={() => handleInputChange('serviceCategory', 'luxury')}
-            >
-              <div className="category-icon">🏎️</div>
-              <h4>Luxury</h4>
-              <p>Premium experience</p>
-            </div>
-          </div>
+          <ServiceSelector 
+            onSelectionChange={(selection) => {
+              handleInputChange('serviceCategory', selection.categoryName);
+              handleInputChange('serviceType', selection.subcategoryName);
+            }}
+          />
         </div>
 
         {/* Timing Section */}
@@ -285,48 +245,7 @@ export const DashboardBook: React.FC = () => {
           box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        .service-categories {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-          gap: 1rem;
-        }
 
-        .category-card {
-          border: 2px solid #e5e7eb;
-          border-radius: 12px;
-          padding: 1rem;
-          text-align: center;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .category-card:hover {
-          border-color: #3b82f6;
-          background: rgba(59, 130, 246, 0.05);
-        }
-
-        .category-card.selected {
-          border-color: #3b82f6;
-          background: rgba(59, 130, 246, 0.1);
-        }
-
-        .category-icon {
-          font-size: 2rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .category-card h4 {
-          margin: 0 0 0.25rem 0;
-          font-size: 1rem;
-          font-weight: 600;
-          color: #1f2937;
-        }
-
-        .category-card p {
-          margin: 0;
-          font-size: 0.8rem;
-          color: #6b7280;
-        }
 
         .timing-options {
           display: flex;
@@ -380,14 +299,6 @@ export const DashboardBook: React.FC = () => {
         }
 
         @media (max-width: 480px) {
-          .form-row {
-            grid-template-columns: 1fr;
-          }
-          
-          .service-categories {
-            grid-template-columns: 1fr;
-          }
-          
           .timing-options {
             flex-direction: column;
             gap: 1rem;

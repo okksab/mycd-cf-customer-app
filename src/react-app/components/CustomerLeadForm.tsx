@@ -161,7 +161,7 @@ export const CustomerLeadForm: React.FC<CustomerLeadFormProps> = ({ onBack, onCo
         <div className="form-section">
           <h4>🚙 Service Details</h4>
           
-          <ServiceSelector onSelectionChanged={onServiceSelection} />
+          <ServiceSelector onSelectionChange={onServiceSelection} />
         </div>
 
         {/* Trip Type */}

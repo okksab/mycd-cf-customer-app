@@ -39,7 +39,7 @@
     "wrangler": "4.21.x"
   },
   "scripts": {
-    "build": "cross-env REACT_APP_ENV=test vite build",
+    "build": "vite build",
     "build:local": "cross-env VITE_PROFILE=local vite build",
     "build:dev": "cross-env VITE_PROFILE=dev vite build",
     "build:production": "cross-env VITE_PROFILE=production vite build",

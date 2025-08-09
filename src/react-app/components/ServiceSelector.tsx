@@ -1,152 +1,125 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import apiService from '../services/apiService';
 
-interface ServiceSelection {
-  category: string;
-  subcategory: string;
-  duration: string;
-  categoryName: string;
-  subcategoryName: string;
-  durationName: string;
+interface ServiceCategory {
+  id: number;
+  name: string;
+  slug: string;
+  level: number;
+  subcategories?: ServiceCategory[];
+  sub_subcategories?: ServiceCategory[];
 }
 
 interface ServiceSelectorProps {
-  onSelectionChanged: (selection: ServiceSelection) => void;
+  onSelectionChange: (selection: {
+    category: number | null;
+    subcategory: number | null;
+    duration: number | null;
+    categoryName: string;
+    subcategoryName: string;
+    durationName: string;
+  }) => void;
 }
 
-export const ServiceSelector = ({ onSelectionChanged }: ServiceSelectorProps) => {
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedSubcategory, setSelectedSubcategory] = useState('');
-  const [selectedDuration, setSelectedDuration] = useState('');
+export const ServiceSelector: React.FC<ServiceSelectorProps> = ({ onSelectionChange }) => {
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<number | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock service categories data
-  const categories = [
-    {
-      id: 'wedding',
-      name: 'Wedding Events',
-      subcategories: [
-        {
-          id: 'bride_groom',
-          name: 'Bride/Groom Transport',
-          sub_subcategories: [
-            { id: '2_hours', name: '2 Hours' },
-            { id: '4_hours', name: '4 Hours' },
-            { id: 'full_day', name: 'Full Day' }
-          ]
-        },
-        {
-          id: 'guest_transport',
-          name: 'Guest Transport',
-          sub_subcategories: [
-            { id: '4_hours', name: '4 Hours' },
-            { id: '8_hours', name: '8 Hours' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'airport',
-      name: 'Airport Transfer',
-      subcategories: [
-        {
-          id: 'pickup',
-          name: 'Airport Pickup',
-          sub_subcategories: [
-            { id: 'one_way', name: 'One Way' },
-            { id: 'round_trip', name: 'Round Trip' }
-          ]
-        },
-        {
-          id: 'drop',
-          name: 'Airport Drop',
-          sub_subcategories: [
-            { id: 'one_way', name: 'One Way' },
-            { id: 'round_trip', name: 'Round Trip' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'daily',
-      name: 'Daily Commute',
-      subcategories: [
-        {
-          id: 'office',
-          name: 'Office Commute',
-          sub_subcategories: [
-            { id: 'monthly', name: 'Monthly Package' },
-            { id: 'weekly', name: 'Weekly Package' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'event',
-      name: 'Events & Functions',
-      subcategories: [
-        {
-          id: 'corporate',
-          name: 'Corporate Events',
-          sub_subcategories: [
-            { id: '4_hours', name: '4 Hours' },
-            { id: '8_hours', name: '8 Hours' }
-          ]
-        },
-        {
-          id: 'personal',
-          name: 'Personal Events',
-          sub_subcategories: [
-            { id: '2_hours', name: '2 Hours' },
-            { id: '4_hours', name: '4 Hours' }
-          ]
-        }
-      ]
-    }
-  ];
+  const selectedCategoryData = categories.find(c => c.id === selectedCategory);
+  const subcategories = selectedCategoryData?.subcategories || [];
+  const selectedSubcategoryData = subcategories.find(s => s.id === selectedSubcategory);
+  const durations = selectedSubcategoryData?.sub_subcategories || [];
 
-  const subcategories = categories.find(c => c.id === selectedCategory)?.subcategories || [];
-  const durations = subcategories.find(s => s.id === selectedSubcategory)?.sub_subcategories || [];
+  useEffect(() => {
+    loadCategories();
+  }, []);
 
-  const emitSelection = () => {
-    const selectedCategoryObj = categories.find(c => c.id === selectedCategory);
-    const selectedSubcategoryObj = subcategories.find(s => s.id === selectedSubcategory);
-    const selectedDurationObj = durations.find(d => d.id === selectedDuration);
+  const loadCategories = async () => {
+    setIsLoading(true);
+    setError(null);
     
-    onSelectionChanged({
-      category: selectedCategory,
-      subcategory: selectedSubcategory,
-      duration: selectedDuration,
-      categoryName: selectedCategoryObj?.name || '',
-      subcategoryName: selectedSubcategoryObj?.name || '',
-      durationName: selectedDurationObj?.name || ''
+    try {
+      const response = await apiService.getServiceCategories();
+      if (response.success && response.data?.categories) {
+        setCategories(response.data.categories);
+      } else {
+        throw new Error('Failed to load service categories');
+      }
+    } catch (error) {
+      console.error('Failed to load categories:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load categories');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCategoryChange = (categoryId: string) => {
+    const id = categoryId ? parseInt(categoryId) : null;
+    setSelectedCategory(id);
+    setSelectedSubcategory(null);
+    setSelectedDuration(null);
+    emitSelection(id, null, null);
+  };
+
+  const handleSubcategoryChange = (subcategoryId: string) => {
+    const id = subcategoryId ? parseInt(subcategoryId) : null;
+    setSelectedSubcategory(id);
+    setSelectedDuration(null);
+    emitSelection(selectedCategory, id, null);
+  };
+
+  const handleDurationChange = (durationId: string) => {
+    const id = durationId ? parseInt(durationId) : null;
+    setSelectedDuration(id);
+    emitSelection(selectedCategory, selectedSubcategory, id);
+  };
+
+  const emitSelection = (categoryId: number | null, subcategoryId: number | null, durationId: number | null) => {
+    const categoryData = categories.find(c => c.id === categoryId);
+    const subcategoryData = categoryData?.subcategories?.find(s => s.id === subcategoryId);
+    const durationData = subcategoryData?.sub_subcategories?.find(d => d.id === durationId);
+
+    onSelectionChange({
+      category: categoryId,
+      subcategory: subcategoryId,
+      duration: durationId,
+      categoryName: categoryData?.name || '',
+      subcategoryName: subcategoryData?.name || '',
+      durationName: durationData?.name || ''
     });
   };
 
-  const onCategoryChange = (e: any) => {
-    setSelectedCategory(e.target.value);
-    setSelectedSubcategory('');
-    setSelectedDuration('');
-  };
+  if (isLoading) {
+    return (
+      <div className="service-selector loading">
+        <div className="loading-spinner"></div>
+        <p>Loading service categories...</p>
+      </div>
+    );
+  }
 
-  const onSubcategoryChange = (e: any) => {
-    setSelectedSubcategory(e.target.value);
-    setSelectedDuration('');
-  };
-
-  const onDurationChange = (e: any) => {
-    setSelectedDuration(e.target.value);
-  };
-
-  useEffect(() => {
-    emitSelection();
-  }, [selectedCategory, selectedSubcategory, selectedDuration]);
+  if (error) {
+    return (
+      <div className="service-selector error">
+        <p>Error: {error}</p>
+        <button onClick={loadCategories} className="retry-btn">
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="service-selector">
       <div className="form-group">
         <label className="form-label">🚗 Service Category</label>
         <select 
-          value={selectedCategory} 
-          onChange={onCategoryChange} 
+          value={selectedCategory || ''} 
+          onChange={(e) => handleCategoryChange(e.target.value)}
           className="form-select"
         >
           <option value="">Select Service Category</option>
@@ -162,8 +135,8 @@ export const ServiceSelector = ({ onSelectionChanged }: ServiceSelectorProps) =>
         <div className="form-group">
           <label className="form-label">📋 Service Type</label>
           <select 
-            value={selectedSubcategory} 
-            onChange={onSubcategoryChange} 
+            value={selectedSubcategory || ''} 
+            onChange={(e) => handleSubcategoryChange(e.target.value)}
             className="form-select"
           >
             <option value="">Select Service Type</option>
@@ -180,8 +153,8 @@ export const ServiceSelector = ({ onSelectionChanged }: ServiceSelectorProps) =>
         <div className="form-group">
           <label className="form-label">⏰ Duration</label>
           <select 
-            value={selectedDuration} 
-            onChange={onDurationChange} 
+            value={selectedDuration || ''} 
+            onChange={(e) => handleDurationChange(e.target.value)}
             className="form-select"
           >
             <option value="">Select Duration</option>
@@ -194,19 +167,38 @@ export const ServiceSelector = ({ onSelectionChanged }: ServiceSelectorProps) =>
         </div>
       )}
 
-      <style>{`
+      <style jsx="true">{`
         .service-selector {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .service-selector.loading,
+        .service-selector.error {
+          text-align: center;
+          padding: 2rem;
+        }
+
+        .loading-spinner {
+          width: 40px;
+          height: 40px;
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #F28C00;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
 
         .form-group {
-          display: flex;
-          flex-direction: column;
+          margin-bottom: 1.5rem;
         }
 
         .form-label {
+          display: block;
           font-weight: 600;
           color: #374151;
           margin-bottom: 0.5rem;
@@ -214,19 +206,39 @@ export const ServiceSelector = ({ onSelectionChanged }: ServiceSelectorProps) =>
         }
 
         .form-select {
+          width: 100%;
           padding: 0.75rem;
           border: 2px solid #e5e7eb;
           border-radius: 8px;
           font-size: 1rem;
+          background-color: white;
           transition: all 0.2s ease;
           font-family: inherit;
-          background: white;
         }
 
         .form-select:focus {
           outline: none;
-          border-color: #3b82f6;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+          border-color: #F28C00;
+          box-shadow: 0 0 0 3px rgba(242, 140, 0, 0.1);
+        }
+
+        .retry-btn {
+          background: #F28C00;
+          color: white;
+          border: none;
+          padding: 0.5rem 1rem;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 600;
+          margin-top: 1rem;
+        }
+
+        .retry-btn:hover {
+          background: #e6741d;
+        }
+
+        .error {
+          color: #dc2626;
         }
       `}</style>
     </div>

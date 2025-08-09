@@ -129,6 +129,10 @@ class ApiService {
     });
   }
 
+  async getServiceCategories() {
+    return this.request('/api/v1/service-categories');
+  }
+
   async verifyOTPEnhanced(mobile: string, otp: string) {
     return this.request('/api/v1/auth/enhanced/otp/verify', {
       method: 'POST',
