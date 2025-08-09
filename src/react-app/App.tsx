@@ -11,6 +11,7 @@ import { DashboardHistory } from './pages/DashboardHistory';
 import { DashboardNotifications } from './pages/DashboardNotifications';
 import { DashboardProfile } from './pages/DashboardProfile';
 import { BookingStatus } from './pages/BookingStatus';
+import { BookingPreview } from './pages/BookingPreview';
 import { CustomerHistory } from './pages/CustomerHistory';
 import './styles/globals.css';
 
@@ -48,6 +49,7 @@ function App() {
               <Route path="/lead-form" element={<LeadForm />} />
             <Route path="/booking-status" element={<BookingStatus />} />
             <Route path="/booking-status/:id" element={<BookingStatus />} />
+            <Route path="/booking-preview" element={<BookingPreview />} />
             <Route path="/customer-history" element={<CustomerHistory />} />
             
             {/* Protected Dashboard Routes */}

@@ -58,9 +58,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setError: (error) => set({ error }),
   clearError: () => set({ error: null }),
   
-  initAuth: () => {
-    // No local storage - user must login each time
-    set({ user: null, isAuthenticated: false });
+  initAuth: async () => {
+    set({ isLoading: true });
+    try {
+      // Check if user is authenticated via httpOnly cookie
+      const response = await apiService.checkAuth();
+      if (response.success && response.data?.customer) {
+        const user = {
+          id: response.data.customer.id,
+          mobile: response.data.customer.mobile,
+          first_name: response.data.customer.firstName || response.data.customer.first_name,
+          last_name: response.data.customer.lastName || response.data.customer.last_name
+        };
+        set({ user, isAuthenticated: true, isLoading: false });
+      } else {
+        set({ user: null, isAuthenticated: false, isLoading: false });
+      }
+    } catch (error) {
+      set({ user: null, isAuthenticated: false, isLoading: false });
+    }
   },
   
   register: async (mobile: string) => {
@@ -104,15 +120,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setupPIN: async (mobile: string, pin: string) => {
     set({ isLoading: true, error: null });
     try {
-      // Setup PIN via backend
+      // Setup PIN via backend (sets httpOnly cookie)
       const response = await apiService.setupPin(mobile, pin) as any;
       
       // Set user as authenticated with backend response
       const user = {
-        id: response.data?.customerId || mobile,
+        id: response.data?.customer?.id || mobile,
         mobile: mobile,
-        first_name: response.data?.firstName || '',
-        last_name: response.data?.lastName || ''
+        first_name: response.data?.customer?.firstName || response.data?.customer?.first_name || '',
+        last_name: response.data?.customer?.lastName || response.data?.customer?.last_name || ''
       };
       
       set({ user, isAuthenticated: true, isLoading: false });
@@ -125,15 +141,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loginWithPIN: async (mobile: string, pin: string) => {
     set({ isLoading: true, error: null });
     try {
-      // Login with PIN via backend
+      // Login with PIN via backend (sets httpOnly cookie)
       const response = await apiService.loginWithPin(mobile, pin) as any;
       
       // Set user as authenticated with backend response
       const user = {
-        id: response.data?.customerId || mobile,
+        id: response.data?.customer?.id || mobile,
         mobile: mobile,
-        first_name: response.data?.firstName || '',
-        last_name: response.data?.lastName || ''
+        first_name: response.data?.customer?.firstName || response.data?.customer?.first_name || '',
+        last_name: response.data?.customer?.lastName || response.data?.customer?.last_name || ''
       };
       
       set({ user, isAuthenticated: true, isLoading: false });
@@ -143,7 +159,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  logout: () => {
+  logout: async () => {
+    try {
+      await apiService.logout(); // Clears httpOnly cookie
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
     set({ user: null, isAuthenticated: false });
   },
 }));

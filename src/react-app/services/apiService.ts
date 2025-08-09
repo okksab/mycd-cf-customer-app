@@ -153,6 +153,7 @@ class ApiService {
     return this.request('/api/v1/auth/login-pin', {
       method: 'POST',
       body: JSON.stringify({ mobile, pin }),
+      credentials: 'include', // Include cookies
     });
   }
 
@@ -168,6 +169,21 @@ class ApiService {
     return this.request('/api/v1/auth/setup-pin', {
       method: 'POST',
       body: JSON.stringify({ mobile, pin }),
+      credentials: 'include', // Include cookies
+    });
+  }
+
+  async logout() {
+    return this.request('/api/v1/auth/logout', {
+      method: 'POST',
+      credentials: 'include', // Include cookies
+    });
+  }
+
+  async checkAuth() {
+    return this.request('/api/v1/auth/verify', {
+      method: 'GET',
+      credentials: 'include', // Include cookies
     });
   }
 }
