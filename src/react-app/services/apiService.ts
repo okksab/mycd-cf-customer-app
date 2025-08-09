@@ -133,6 +133,10 @@ class ApiService {
     return this.request('/api/v1/service-categories');
   }
 
+  async getVehicleTypes() {
+    return this.request('/api/v1/vehicle-types');
+  }
+
   async verifyOTPEnhanced(mobile: string, otp: string) {
     return this.request('/api/v1/auth/enhanced/otp/verify', {
       method: 'POST',

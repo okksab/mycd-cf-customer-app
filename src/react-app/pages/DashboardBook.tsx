@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ServiceSelector } from '../components/ServiceSelector';
+import { VehicleTypeSelector } from '../components/VehicleTypeSelector';
 
 export const DashboardBook: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -7,7 +8,7 @@ export const DashboardBook: React.FC = () => {
     toLocation: '',
     serviceType: '',
     serviceCategory: '',
-    tripType: 'LOCAL',
+    vehicleType: '',
     scheduledTime: '',
     specialRequirements: ''
   });
@@ -16,6 +17,40 @@ export const DashboardBook: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate all mandatory fields
+    if (!formData.fromLocation.trim()) {
+      alert('Please enter pickup location');
+      return;
+    }
+    
+    if (!formData.toLocation.trim()) {
+      alert('Please enter destination location');
+      return;
+    }
+    
+    if (!formData.serviceType || !formData.serviceCategory) {
+      alert('Please complete service selection (category, type, and duration)');
+      return;
+    }
+    
+    if (!formData.vehicleType) {
+      alert('Please select a vehicle type');
+      return;
+    }
+    
+    // Validate timing
+    const timingRadio = document.querySelector('input[name="timing"]:checked') as HTMLInputElement;
+    if (!timingRadio) {
+      alert('Please select timing (Book Now or Schedule for Later)');
+      return;
+    }
+    
+    if (timingRadio.value === 'scheduled' && !formData.scheduledTime) {
+      alert('Please select scheduled date and time');
+      return;
+    }
+    
     setIsLoading(true);
     
     // Mock API call
@@ -58,27 +93,14 @@ export const DashboardBook: React.FC = () => {
             <input
               type="text"
               className="form-input"
-              placeholder="Enter destination (optional for hourly)"
+              placeholder="Enter destination"
               value={formData.toLocation}
               onChange={(e) => handleInputChange('toLocation', e.target.value)}
+              required
             />
           </div>
 
-          <div className="form-group">
-            <label>Trip Type</label>
-            <select
-              className="form-input"
-              value={formData.tripType}
-              onChange={(e) => handleInputChange('tripType', e.target.value)}
-              required
-            >
-              <option value="LOCAL">Local</option>
-              <option value="OUTSTATION">Outstation</option>
-              <option value="DROP">Drop</option>
-              <option value="ROUNDTRIP">Round Trip</option>
-              <option value="HOURLY">Hourly</option>
-            </select>
-          </div>
+
         </div>
 
         {/* Service Category Section */}
@@ -90,6 +112,16 @@ export const DashboardBook: React.FC = () => {
               handleInputChange('serviceCategory', selection.categoryName);
               handleInputChange('serviceType', selection.subcategoryName);
             }}
+          />
+        </div>
+
+        {/* Vehicle Type Section */}
+        <div className="form-section">
+          <h3>🚗 Vehicle Type</h3>
+          
+          <VehicleTypeSelector 
+            selectedVehicleType={formData.vehicleType}
+            onSelectionChange={(vehicleType) => handleInputChange('vehicleType', vehicleType)}
           />
         </div>
 
@@ -131,7 +163,7 @@ export const DashboardBook: React.FC = () => {
 
         {/* Special Requirements */}
         <div className="form-section">
-          <h3>📝 Special Requirements</h3>
+          <h3>📝 Special Requirements (Optional)</h3>
           
           <div className="form-group">
             <textarea
@@ -147,7 +179,7 @@ export const DashboardBook: React.FC = () => {
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={isLoading || !formData.fromLocation || !formData.serviceType}
+          disabled={isLoading || !formData.fromLocation || !formData.toLocation || !formData.serviceType || !formData.vehicleType}
           className="btn btn-primary submit-btn"
         >
           {isLoading ? (
@@ -157,7 +189,7 @@ export const DashboardBook: React.FC = () => {
             </>
           ) : (
             <>
-              🚗 Submit Booking Request
+              📋 Preview and Submit
             </>
           )}
         </button>
