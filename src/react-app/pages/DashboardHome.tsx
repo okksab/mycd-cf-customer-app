@@ -277,16 +277,16 @@ export const DashboardHome: React.FC = () => {
 
 
         .hero-cta-section {
-          margin-bottom: 2rem;
+          margin: 1rem 0;
         }
 
         .hero-cta-card {
-          background: #003B71;
-          border-radius: 20px;
-          padding: 2rem;
+          background: #F58220;
+          border-radius: 12px;
+          padding: 1.5rem;
           position: relative;
           overflow: hidden;
-          box-shadow: 0 8px 25px rgba(0, 59, 113, 0.3);
+          box-shadow: 0 2px 8px rgba(245, 130, 32, 0.2);
           border: 1px solid rgba(255, 255, 255, 0.1);
           height: 280px;
           display: flex;
@@ -330,7 +330,7 @@ export const DashboardHome: React.FC = () => {
           align-items: center;
           justify-content: center;
           gap: 0.75rem;
-          background: #F58220;
+          background: #003B71;
           color: white;
           text-decoration: none;
           padding: 1rem 2rem;
@@ -338,14 +338,14 @@ export const DashboardHome: React.FC = () => {
           font-weight: 600;
           font-size: 1rem;
           transition: all 0.3s ease;
-          box-shadow: 0 4px 15px rgba(245, 130, 32, 0.3);
+          box-shadow: 0 4px 15px rgba(0, 59, 113, 0.3);
           border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .hero-cta-button:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(245, 130, 32, 0.4);
-          background: #e6741d;
+          box-shadow: 0 8px 25px rgba(0, 59, 113, 0.4);
+          background: #002a52;
         }
 
         .hero-cta-button::before {
@@ -478,9 +478,9 @@ export const DashboardHome: React.FC = () => {
         }
 
         .wallet-btn.primary {
-          background: #F58220;
+          background: #003B71;
           color: white;
-          box-shadow: 0 4px 15px rgba(245, 130, 32, 0.3);
+          box-shadow: 0 4px 15px rgba(0, 59, 113, 0.3);
         }
 
         .wallet-btn.secondary {
@@ -495,8 +495,8 @@ export const DashboardHome: React.FC = () => {
         }
 
         .wallet-btn.primary:hover {
-          box-shadow: 0 6px 20px rgba(245, 130, 32, 0.4);
-          background: #e6741d;
+          box-shadow: 0 6px 20px rgba(0, 59, 113, 0.4);
+          background: #002a52;
         }
 
         .wallet-btn.secondary:hover {
@@ -540,8 +540,8 @@ export const DashboardHome: React.FC = () => {
         }
 
         .slide-nav-btn:hover {
-          background: rgba(245, 130, 32, 0.3);
-          border-color: rgba(245, 130, 32, 0.5);
+          background: rgba(0, 59, 113, 0.3);
+          border-color: rgba(0, 59, 113, 0.5);
           transform: scale(1.1);
         }
 
@@ -563,7 +563,7 @@ export const DashboardHome: React.FC = () => {
           right: -60px;
           width: 150px;
           height: 150px;
-          background: rgba(245, 130, 32, 0.1);
+          background: rgba(0, 59, 113, 0.1);
           border-radius: 50%;
         }
 
@@ -581,8 +581,8 @@ export const DashboardHome: React.FC = () => {
         .map-section {
           background: white;
           border-radius: 12px;
-          padding: 1rem;
-          margin-bottom: 1.5rem;
+          padding: 1.5rem;
+          margin-bottom: 1rem;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
@@ -637,7 +637,7 @@ export const DashboardHome: React.FC = () => {
 
         @media (max-width: 480px) {
           .hero-cta-card {
-            padding: 1.5rem;
+            padding: 1rem;
             margin: 0 0.5rem;
             height: 260px;
           }

@@ -404,7 +404,7 @@ export const RecentRequestsCarousel = () => {
         }
 
         .load-more-card {
-          background: linear-gradient(135deg, #F58220 0%, #e6741d 100%);
+          background: #F58220;
           color: white;
           border-radius: 8px;
           padding: 2rem 1rem;
@@ -421,6 +421,7 @@ export const RecentRequestsCarousel = () => {
         .load-more-card:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(245, 130, 32, 0.3);
+          background: #e6741d;
         }
 
         .load-more-icon {

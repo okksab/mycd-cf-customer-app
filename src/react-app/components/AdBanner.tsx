@@ -23,7 +23,7 @@ export const AdBanner: React.FC = () => {
       <style jsx="true">{`
         .ad-banner {
           width: 100%;
-          margin: 1rem 0;
+          margin-bottom: 1rem;
           display: flex;
           justify-content: center;
         }
