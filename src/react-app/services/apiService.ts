@@ -112,6 +112,13 @@ class ApiService {
     return this.request(`/api/v1/leads/status/${requestId}`);
   }
 
+  async getCustomerLeadsByMobile(mobile: string) {
+    return this.request(`/api/v1/leads/customer/mobile/${mobile}`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+  }
+
   async getGuestHistory(sessionId: string) {
     return this.request(`/api/guest/history/${sessionId}`);
   }

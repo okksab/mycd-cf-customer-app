@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
+import { apiService } from '../services/apiService';
 
 interface Request {
   request_id: string;
@@ -19,33 +20,7 @@ export const RecentRequestsCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Mock recent requests
-  const mockRequests: Request[] = [
-    {
-      request_id: 'REQ-2024-001',
-      from_location: 'MG Road, Bangalore',
-      to_location: 'Palace Grounds, Bangalore',
-      status: 'completed',
-      created_at: '2024-12-15T10:30:00Z',
-      service_category_name: 'Wedding Event'
-    },
-    {
-      request_id: 'REQ-2024-002',
-      from_location: 'Koramangala, Bangalore',
-      to_location: 'Kempegowda Airport',
-      status: 'completed',
-      created_at: '2024-12-10T14:20:00Z',
-      service_category_name: 'Airport Transfer'
-    },
-    {
-      request_id: 'REQ-2024-003',
-      from_location: 'Electronic City',
-      to_location: 'Whitefield',
-      status: 'cancelled',
-      created_at: '2024-12-08T09:15:00Z',
-      service_category_name: 'Daily Commute'
-    }
-  ];
+
 
   // Display requests with Load More card
   const displayRequests = [...recentRequests, { isLoadMore: true }];
@@ -53,9 +28,38 @@ export const RecentRequestsCarousel = () => {
   useEffect(() => {
     const loadRecentRequests = async () => {
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setRecentRequests(mockRequests);
+        // Get current user info from JWT
+        const currentUserResponse = await apiService.getCurrentUser();
+        console.log('Current user response:', currentUserResponse);
+        
+        if (!currentUserResponse.success) {
+          throw new Error('Failed to get user info');
+        }
+        
+        const mobile = currentUserResponse.data.mobile;
+        console.log('Customer mobile:', mobile);
+        
+        // Fetch customer leads from API using mobile number
+        const leadsResponse = await apiService.getCustomerLeadsByMobile(mobile);
+        console.log('Leads response:', leadsResponse);
+        
+        if (leadsResponse.success) {
+          console.log('Leads data:', leadsResponse.data);
+          // Map leads to request format
+          const mappedRequests = leadsResponse.data.map((lead: any) => ({
+            request_id: lead.requestId,
+            from_location: lead.fromLocation,
+            to_location: lead.toLocation,
+            status: lead.status.toLowerCase(),
+            created_at: lead.createdAt,
+            service_category_name: lead.serviceCategory
+          }));
+          console.log('Mapped requests:', mappedRequests);
+          setRecentRequests(mappedRequests);
+        } else {
+          console.log('Leads response failed:', leadsResponse);
+          setRecentRequests([]);
+        }
       } catch (error) {
         console.error('Failed to load recent requests:', error);
         setRecentRequests([]);
