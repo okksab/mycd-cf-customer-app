@@ -10,6 +10,8 @@ import { DashboardBook } from './pages/DashboardBook';
 import { DashboardHistory } from './pages/DashboardHistory';
 import { DashboardNotifications } from './pages/DashboardNotifications';
 import { DashboardProfile } from './pages/DashboardProfile';
+import { DashboardMore } from './pages/DashboardMore';
+import { DashboardWallet } from './pages/DashboardWallet';
 import { BookingStatus } from './pages/BookingStatus';
 import { BookingPreview } from './pages/BookingPreview';
 import { CustomerHistory } from './pages/CustomerHistory';
@@ -68,7 +70,9 @@ function App() {
               <Route index element={<Navigate to="/dashboard/home" replace />} />
               <Route path="home" element={<DashboardHome />} />
               <Route path="book" element={<DashboardBook />} />
+              <Route path="wallet" element={<DashboardWallet />} />
               <Route path="history" element={<DashboardHistory />} />
+              <Route path="more" element={<DashboardMore />} />
               <Route path="notifications" element={<DashboardNotifications />} />
               <Route path="profile" element={<DashboardProfile />} />
             </Route>

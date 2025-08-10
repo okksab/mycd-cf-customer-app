@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 
@@ -9,6 +9,7 @@ interface DashboardLayoutProps {
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user } = useAuthStore();
   const location = useLocation();
+
 
   const displayName = React.useMemo(() => {
     if (user?.first_name || user?.last_name) {
@@ -44,6 +45,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         </div>
       </div>
 
+
+
       {/* Bottom Navigation */}
       <nav className="bottom-nav">
         <Link to="/dashboard/home" className={`nav-item ${isActive('/dashboard/home') ? 'active' : ''}`}>
@@ -52,8 +55,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         </Link>
         
         <Link to="/dashboard/book" className={`nav-item ${isActive('/dashboard/book') ? 'active' : ''}`}>
-          <div className="nav-icon">📝</div>
+          <div className="nav-icon">🚗</div>
           <span className="nav-label">Book</span>
+        </Link>
+        
+        <Link to="/dashboard/wallet" className={`nav-item ${isActive('/dashboard/wallet') ? 'active' : ''}`}>
+          <div className="nav-icon">💳</div>
+          <span className="nav-label">Wallet</span>
         </Link>
         
         <Link to="/dashboard/history" className={`nav-item ${isActive('/dashboard/history') ? 'active' : ''}`}>
@@ -61,14 +69,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           <span className="nav-label">History</span>
         </Link>
         
-        <Link to="/dashboard/notifications" className={`nav-item ${isActive('/dashboard/notifications') ? 'active' : ''}`}>
-          <div className="nav-icon">🔔</div>
-          <span className="nav-label">Inbox</span>
-        </Link>
-        
-        <Link to="/dashboard/profile" className={`nav-item ${isActive('/dashboard/profile') ? 'active' : ''}`}>
-          <div className="nav-icon">👤</div>
-          <span className="nav-label">Profile</span>
+        <Link to="/dashboard/more" className={`nav-item ${isActive('/dashboard/more') ? 'active' : ''}`}>
+          <div className="nav-icon">⚙️</div>
+          <span className="nav-label">More</span>
         </Link>
       </nav>
 
@@ -205,6 +208,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           font-size: 0.65rem;
           font-weight: 500;
         }
+
+
+
+
 
         @media (max-width: 480px) {
           .top-nav {
