@@ -64,7 +64,23 @@ export const LoginFlow: React.FC = () => {
           {isLoading ? 'Logging in...' : 'Login'}
         </button>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && (
+          <div className="error-container">
+            <div className="error-message">{error}</div>
+            {(error.includes('not registered') || error.includes('MOBILE_NOT_FOUND')) && (
+              <button 
+                onClick={() => {
+                  useAuthStore.getState().clearError();
+                  navigate('/auth?tab=register');
+                }}
+                className="register-link"
+                type="button"
+              >
+                New user? Register here
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <style jsx="true">{`
@@ -162,13 +178,37 @@ export const LoginFlow: React.FC = () => {
           box-shadow: 0 4px 12px rgba(242, 140, 0, 0.3);
         }
 
+        .error-container {
+          margin-top: 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
         .error-message {
           background: #fee2e2;
           color: #dc2626;
           padding: 1rem;
           border-radius: 8px;
           text-align: center;
-          margin-top: 1rem;
+        }
+
+        .register-link {
+          background: none;
+          border: none;
+          color: #2563eb;
+          text-decoration: underline;
+          cursor: pointer;
+          font-size: 14px;
+          padding: 8px;
+          border-radius: 4px;
+          transition: all 0.2s ease;
+          text-align: center;
+        }
+
+        .register-link:hover {
+          color: #1d4ed8;
+          background: rgba(37, 99, 235, 0.1);
         }
       `}</style>
     </div>

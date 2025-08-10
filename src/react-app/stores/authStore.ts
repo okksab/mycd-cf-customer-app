@@ -144,6 +144,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Login with PIN via backend (sets httpOnly cookie)
       const response = await apiService.loginWithPin(mobile, pin) as any;
       
+      console.log('DEBUG: Login response:', response);
+      
+      // Check if login was successful
+      if (!response.success) {
+        const errorMessage = response.message || 'Login failed';
+        set({ error: errorMessage, isLoading: false });
+        throw new Error(errorMessage);
+      }
+      
       // Set user as authenticated with backend response
       const user = {
         id: response.data?.customer?.id || mobile,
@@ -154,7 +163,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       
       set({ user, isAuthenticated: true, isLoading: false });
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'Login failed', isLoading: false });
+      // Preserve the specific error message from backend
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      set({ error: errorMessage, isLoading: false });
       throw error;
     }
   },

@@ -44,7 +44,19 @@ class ApiService {
       });
 
       if (!response.ok) {
-        const error = new Error(`API Error: ${response.status} ${response.statusText}`);
+        let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+        
+        // Try to parse JSON error response
+        try {
+          const errorData = JSON.parse(responseData);
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (parseError) {
+          // Keep default error message if JSON parsing fails
+        }
+        
+        const error = new Error(errorMessage);
         console.error(`[API Error] ${requestId}`, {
           endpoint,
           method: options.method || 'GET',
