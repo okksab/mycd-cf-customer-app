@@ -1,76 +1,85 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useCustomerStore } from '../stores/customerStore';
-import apiService from '../services/apiService';
+import { apiService } from '../services/apiService';
 
 export const BookingStatus: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { getRequestById } = useCustomerStore();
-  const [booking, setBooking] = useState<any>(null);
+  const [leadData, setLeadData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadBooking = async () => {
+    // Extract requestId from URL
+    const pathParts = window.location.pathname.split('/');
+    const requestId = pathParts[pathParts.length - 1];
+    
+    if (!requestId) {
+      setError('Invalid booking reference');
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchLeadStatus = async () => {
       try {
-        // First check customerStore for local data
-        const localRequest = id ? getRequestById(id) : null;
-        
-        if (localRequest) {
-          setBooking({
-            id: localRequest.requestId,
-            service: localRequest.service,
-            fromLocation: localRequest.fromLocation,
-            toLocation: localRequest.toLocation,
-            status: localRequest.status,
-            amount: localRequest.amount
-          });
+        const response = await apiService.getLeadStatus(requestId);
+        if (response.success) {
+          setLeadData(response.data);
+          setError(null);
+        } else {
+          setError(response.message || 'Failed to fetch booking status');
         }
-        
-        // Call backend API to get latest booking status
-        if (id) {
-          const response = await apiService.getLeadStatus(id);
-          if (response.success && response.data) {
-            setBooking(response.data);
-          }
-        }
-        
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error loading booking:', error);
+      } catch (err) {
+        setError('Failed to fetch booking status');
+      } finally {
         setIsLoading(false);
       }
     };
+
+    fetchLeadStatus();
     
-    loadBooking();
-  }, [id, getRequestById]);
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchLeadStatus, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'NEW': return '#3b82f6';
+      case 'SENT_TO_DRIVERS': return '#f59e0b';
+      case 'ACCEPTED_BY_DRIVER': return '#10b981';
+      case 'CONVERTED_TO_TRIP': return '#059669';
+      case 'CANCELLED_BY_CUSTOMER': return '#ef4444';
+      case 'CANCELLED_BY_DRIVER': return '#f97316';
+      default: return '#6b7280';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'NEW': return 'Request Received';
+      case 'SENT_TO_DRIVERS': return 'Finding Driver';
+      case 'ACCEPTED_BY_DRIVER': return 'Driver Assigned';
+      case 'CONVERTED_TO_TRIP': return 'Trip Started';
+      case 'CANCELLED_BY_CUSTOMER': return 'Cancelled by You';
+      case 'CANCELLED_BY_DRIVER': return 'Driver Cancelled';
+      default: return status.replace(/_/g, ' ');
+    }
+  };
 
   if (isLoading) {
     return (
       <div className="booking-status loading">
-        <div className="logo-container">
-          <img src="/logo.png" alt="MyCallDriver" className="brand-logo" onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-          }} />
-        </div>
         <div className="loading-spinner"></div>
-        <p>Loading booking details...</p>
+        <p>Loading booking status...</p>
       </div>
     );
   }
 
-  if (!booking) {
+  if (error) {
     return (
       <div className="booking-status error">
-        <div className="logo-container">
-          <img src="/logo.png" alt="MyCallDriver" className="brand-logo" onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-          }} />
-        </div>
-        <h2>Booking Not Found</h2>
-        <p>The booking you're looking for doesn't exist.</p>
-        <button onClick={() => navigate('/')} className="btn btn-primary">
-          Go Home
+        <h2>❌ Error</h2>
+        <p>{error}</p>
+        <button onClick={() => window.location.href = '/dashboard'}>
+          Back to Dashboard
         </button>
       </div>
     );
@@ -78,72 +87,70 @@ export const BookingStatus: React.FC = () => {
 
   return (
     <div className="booking-status">
+      <div className="logo-container">
+        <img src="/logo.png" alt="MyCallDriver" className="brand-logo" onError={(e) => {
+          (e.target as HTMLImageElement).style.display = 'none';
+        }} />
+      </div>
+
       <div className="status-header">
-        <div className="logo-container">
-          <img src="/logo.png" alt="MyCallDriver" className="brand-logo" onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-          }} />
-        </div>
-        <div className="status-icon">✅</div>
-        <h1>Booking Confirmed!</h1>
-        <p>Your driver has been assigned</p>
-      </div>
-
-      <div className="booking-details-card">
-        <h2>Booking Details</h2>
-        
-        <div className="detail-row">
-          <span className="label">Booking ID:</span>
-          <span className="value">{booking.id}</span>
-        </div>
-        
-        <div className="detail-row">
-          <span className="label">Service:</span>
-          <span className="value">{booking.service}</span>
-        </div>
-        
-        <div className="detail-row">
-          <span className="label">From:</span>
-          <span className="value">{booking.fromLocation}</span>
-        </div>
-        
-        <div className="detail-row">
-          <span className="label">To:</span>
-          <span className="value">{booking.toLocation}</span>
-        </div>
-        
-        <div className="detail-row">
-          <span className="label">Amount:</span>
-          <span className="value">₹{booking.amount}</span>
+        <h2>🚗 Booking Status</h2>
+        <div className="request-id">Request ID: {leadData.requestId}</div>
+        <div 
+          className="status-badge" 
+          style={{ backgroundColor: getStatusColor(leadData.status) }}
+        >
+          {getStatusText(leadData.status)}
         </div>
       </div>
 
-      <div className="driver-details-card">
-        <h2>Driver Details</h2>
-        
-        <div className="driver-info">
-          <div className="driver-avatar">
-            {booking.driverName.charAt(0)}
+      <div className="status-content">
+        <div className="status-section">
+          <h3>📍 Trip Details</h3>
+          <div className="detail-row">
+            <span className="label">From:</span>
+            <span className="value">{leadData.fromLocation}</span>
           </div>
-          <div className="driver-details">
-            <h3>{booking.driverName}</h3>
-            <p>{booking.vehicleNumber}</p>
-            <p>📞 {booking.driverPhone}</p>
+          <div className="detail-row">
+            <span className="label">To:</span>
+            <span className="value">{leadData.toLocation}</span>
+          </div>
+          <div className="detail-row">
+            <span className="label">Service:</span>
+            <span className="value">{leadData.serviceCategory}</span>
+          </div>
+          <div className="detail-row">
+            <span className="label">Duration:</span>
+            <span className="value">{leadData.serviceDuration}</span>
           </div>
         </div>
-        
-        <div className="driver-actions">
-          <button className="btn btn-primary">Call Driver</button>
-          <button className="btn btn-secondary">Send Message</button>
+
+        <div className="status-section">
+          <h3>👤 Customer Details</h3>
+          <div className="detail-row">
+            <span className="label">Name:</span>
+            <span className="value">{leadData.customerFirstName} {leadData.customerLastName}</span>
+          </div>
+          <div className="detail-row">
+            <span className="label">Mobile:</span>
+            <span className="value">{leadData.mobileNumber}</span>
+          </div>
         </div>
+
+        {leadData.specialRequirements && (
+          <div className="status-section">
+            <h3>📝 Special Requirements</h3>
+            <div className="special-req">{leadData.specialRequirements}</div>
+          </div>
+        )}
       </div>
 
-      <div className="action-buttons">
-        <button onClick={() => navigate('/dashboard/history')} className="btn btn-secondary">
-          View History
+      <div className="status-actions">
+        <button onClick={() => window.location.href = '/dashboard'}>
+          Back to Dashboard
         </button>
-        <button onClick={() => navigate('/dashboard/book')} className="btn btn-primary">
-          Book Another Ride
+        <button onClick={() => window.location.reload()}>
+          Refresh Status
         </button>
       </div>
 
@@ -151,21 +158,11 @@ export const BookingStatus: React.FC = () => {
         .booking-status {
           max-width: 600px;
           margin: 0 auto;
-          padding: 2rem 1rem;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          gap: 2rem;
-        }
-
-        .booking-status.loading,
-        .booking-status.error {
-          justify-content: center;
-          align-items: center;
-          text-align: center;
+          padding: 1rem;
         }
 
         .logo-container {
+          text-align: center;
           margin-bottom: 2rem;
         }
 
@@ -173,17 +170,120 @@ export const BookingStatus: React.FC = () => {
           height: 60px;
           max-width: 200px;
           object-fit: contain;
-          filter: drop-shadow(0 2px 8px rgba(0,0,0,0.1));
+        }
+
+        .status-header {
+          text-align: center;
+          margin-bottom: 2rem;
+        }
+
+        .status-header h2 {
+          color: #003B71;
+          margin: 0 0 1rem 0;
+        }
+
+        .request-id {
+          font-size: 0.9rem;
+          color: #6b7280;
+          margin-bottom: 1rem;
+        }
+
+        .status-badge {
+          display: inline-block;
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
+          color: white;
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+
+        .status-content {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .status-section {
+          background: white;
+          border-radius: 12px;
+          padding: 1.5rem;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .status-section h3 {
+          color: #1f2937;
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin: 0 0 1rem 0;
+          padding-bottom: 0.5rem;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .detail-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 0.75rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid #f3f4f6;
+        }
+
+        .detail-row:last-child {
+          border-bottom: none;
+          margin-bottom: 0;
+          padding-bottom: 0;
+        }
+
+        .detail-row .label {
+          font-weight: 600;
+          color: #6b7280;
+        }
+
+        .detail-row .value {
+          color: #1f2937;
+          text-align: right;
+        }
+
+        .special-req {
+          background: #f9fafb;
+          padding: 1rem;
+          border-radius: 8px;
+          font-style: italic;
+        }
+
+        .status-actions {
+          display: flex;
+          gap: 1rem;
+          justify-content: center;
+        }
+
+        .status-actions button {
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          border: none;
+          font-weight: 600;
+          cursor: pointer;
+          background: #003B71;
+          color: white;
+        }
+
+        .status-actions button:hover {
+          background: #002a52;
+        }
+
+        .loading {
+          text-align: center;
+          padding: 3rem;
         }
 
         .loading-spinner {
           width: 40px;
           height: 40px;
-          border: 4px solid #f3f3f3;
+          border: 4px solid #f3f4f6;
           border-top: 4px solid #003B71;
           border-radius: 50%;
           animation: spin 1s linear infinite;
-          margin-bottom: 1rem;
+          margin: 0 auto 1rem;
         }
 
         @keyframes spin {
@@ -191,180 +291,45 @@ export const BookingStatus: React.FC = () => {
           100% { transform: rotate(360deg); }
         }
 
-        .status-header {
+        .error {
           text-align: center;
-          background: white;
-          border-radius: 16px;
-          padding: 2rem;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+          padding: 3rem;
         }
 
-        .status-icon {
-          font-size: 4rem;
+        .error h2 {
+          color: #ef4444;
           margin-bottom: 1rem;
         }
 
-        .status-header h1 {
-          color: #10b981;
-          font-size: 2rem;
-          font-weight: 700;
-          margin: 0 0 0.5rem 0;
-        }
-
-        .status-header p {
-          color: #6b7280;
-          font-size: 1.1rem;
-          margin: 0;
-        }
-
-        .booking-details-card,
-        .driver-details-card {
-          background: white;
-          border-radius: 16px;
-          padding: 2rem;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        .booking-details-card h2,
-        .driver-details-card h2 {
-          color: #1f2937;
-          font-size: 1.25rem;
-          font-weight: 600;
-          margin: 0 0 1.5rem 0;
-        }
-
-        .detail-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0.75rem 0;
-          border-bottom: 1px solid #f3f4f6;
-        }
-
-        .detail-row:last-child {
-          border-bottom: none;
-        }
-
-        .label {
-          color: #6b7280;
-          font-weight: 500;
-        }
-
-        .value {
-          color: #1f2937;
-          font-weight: 600;
-        }
-
-        .driver-info {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          margin-bottom: 1.5rem;
-        }
-
-        .driver-avatar {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
+        .error button {
+          padding: 0.75rem 1.5rem;
           background: #003B71;
           color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          font-size: 1.5rem;
-        }
-
-        .driver-details h3 {
-          color: #1f2937;
-          font-size: 1.1rem;
-          font-weight: 600;
-          margin: 0 0 0.25rem 0;
-        }
-
-        .driver-details p {
-          color: #6b7280;
-          font-size: 0.9rem;
-          margin: 0.25rem 0;
-        }
-
-        .driver-actions {
-          display: flex;
-          gap: 1rem;
-        }
-
-        .driver-actions .btn {
-          flex: 1;
-        }
-
-        .action-buttons {
-          display: flex;
-          gap: 1rem;
-          margin-top: auto;
-        }
-
-        .action-buttons .btn {
-          flex: 1;
-          padding: 1rem;
-          font-size: 1rem;
-          font-weight: 600;
-        }
-
-        .btn {
-          padding: 0.75rem 1.5rem;
           border: none;
           border-radius: 8px;
-          font-size: 0.9rem;
-          font-weight: 600;
           cursor: pointer;
-          transition: all 0.2s ease;
-          font-family: inherit;
-        }
-
-        .btn-primary {
-          background: linear-gradient(135deg, #F28C00 0%, #e6741d 100%);
-          color: white;
-        }
-
-        .btn-primary:hover {
-          background: linear-gradient(135deg, #e6741d 0%, #d1661a 100%);
-          transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-          background: #f3f4f6;
-          color: #374151;
-          border: 1px solid #d1d5db;
-        }
-
-        .btn-secondary:hover {
-          background: #e5e7eb;
         }
 
         @media (max-width: 480px) {
           .booking-status {
-            padding: 1rem 0.5rem;
+            padding: 0.5rem;
           }
           
-          .status-header,
-          .booking-details-card,
-          .driver-details-card {
-            padding: 1.5rem;
-          }
-          
-          .status-header h1 {
-            font-size: 1.5rem;
-          }
-          
-          .driver-actions,
-          .action-buttons {
-            flex-direction: column;
+          .status-section {
+            padding: 1rem;
           }
           
           .detail-row {
             flex-direction: column;
-            align-items: flex-start;
             gap: 0.25rem;
+          }
+          
+          .detail-row .value {
+            text-align: left;
+          }
+          
+          .status-actions {
+            flex-direction: column;
           }
         }
       `}</style>

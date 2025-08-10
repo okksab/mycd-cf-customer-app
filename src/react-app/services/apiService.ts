@@ -109,7 +109,7 @@ class ApiService {
   }
 
   async getLeadStatus(requestId: string) {
-    return this.request(`/api/leads/${requestId}/status`);
+    return this.request(`/api/v1/leads/status/${requestId}`);
   }
 
   async getGuestHistory(sessionId: string) {
