@@ -26,20 +26,14 @@ export const BookingPreview: React.FC = () => {
     setIsLoading(true);
     
     try {
-      // Get user data from session/localStorage
-      const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-      const userSession = JSON.parse(localStorage.getItem('userSession') || '{}');
+      // Get customer info from JWT (secure approach)
+      const currentUserResponse = await apiService.getCurrentUser();
+      const customerData = currentUserResponse.success ? currentUserResponse.data : {};
       
-      // Generate unique lead ID
-      const leadIdResponse = await apiService.generateLeadId(userData.state || userSession.state);
-      const leadId = leadIdResponse.data;
-      
-      // Build lead data dynamically
       const leadData = {
-        request_id: leadId,
-        customer_first_name: userData.firstName || userSession.firstName || '',
-        customer_last_name: userData.lastName || userSession.lastName || '',
-        mobile_number: userData.mobile || userSession.mobile || '',
+        customer_first_name: customerData.firstName || 'Guest',
+        customer_last_name: customerData.lastName || 'User',
+        mobile_number: customerData.mobile || '',
         from_location: bookingData.fromLocation,
         to_location: bookingData.toLocation,
         service_type: bookingData.serviceType,
@@ -51,20 +45,25 @@ export const BookingPreview: React.FC = () => {
         vehicle_type: bookingData.vehicleType,
         scheduled_time: bookingData.selectedTiming === 'scheduled' ? bookingData.scheduledTime : null,
         lead_type: bookingData.selectedTiming === 'now' ? 'INSTANT' : 'SCHEDULED',
-        customer_id: userData.customerId || userSession.customerId || null,
-        geo_state: userData.state || userSession.state || null,
-        geo_city: userData.city || userSession.city || null,
-        geo_pincode: userData.pincode || userSession.pincode || null
+        customer_id: customerData.customerId || null,
+        geo_state: customerData.state || null,
+        geo_city: customerData.city || null,
+        geo_pincode: customerData.pincode || null
       };
       
       // Create lead
-      await apiService.createLead(leadData);
+      const response = await apiService.createLead(leadData);
+      
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'Failed to create lead');
+      }
       
       // Clear preview data
       sessionStorage.removeItem('bookingPreviewData');
       
-      // Navigate to booking status page
-      window.location.href = `/booking-status/${leadId}`;
+      // Navigate to booking status page with generated lead ID
+      const createdLead = response.data;
+      window.location.href = `/booking-status/${createdLead.requestId}`;
     } catch (error) {
       console.error('Failed to submit booking:', error);
       alert('Failed to submit booking. Please try again.');

@@ -102,7 +102,7 @@ class ApiService {
   }
 
   async createLead(leadData: any) {
-    return this.request('/api/leads', {
+    return this.request('/api/v1/leads/create', {
       method: 'POST',
       body: JSON.stringify(leadData),
     });
@@ -194,6 +194,13 @@ class ApiService {
 
   async checkAuth() {
     return this.request('/api/v1/auth/verify', {
+      method: 'GET',
+      credentials: 'include', // Include cookies
+    });
+  }
+
+  async getCurrentUser() {
+    return this.request('/api/v1/auth/me', {
       method: 'GET',
       credentials: 'include', // Include cookies
     });
