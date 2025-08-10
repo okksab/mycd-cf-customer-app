@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { apiService } from '../services/apiService';
 
 interface BookingHistory {
   id: string;
@@ -15,50 +16,66 @@ interface BookingHistory {
 export const DashboardHistory: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'completed' | 'cancelled' | 'pending'>('all');
 
-  // Mock data
-  const bookings: BookingHistory[] = [
-    {
-      id: '1',
-      requestId: 'REQ-2024-001',
-      service: 'Wedding Event',
-      fromLocation: 'MG Road, Bangalore',
-      toLocation: 'Palace Grounds, Bangalore',
-      date: '2024-12-15',
-      status: 'completed',
-      driverName: 'Rajesh Kumar',
-      amount: 2500
-    },
-    {
-      id: '2',
-      requestId: 'REQ-2024-002',
-      service: 'Airport Transfer',
-      fromLocation: 'Koramangala, Bangalore',
-      toLocation: 'Kempegowda Airport',
-      date: '2024-12-10',
-      status: 'completed',
-      driverName: 'Suresh Patel',
-      amount: 800
-    },
-    {
-      id: '3',
-      requestId: 'REQ-2024-003',
-      service: 'Daily Commute',
-      fromLocation: 'HSR Layout',
-      toLocation: 'Electronic City',
-      date: '2024-12-08',
-      status: 'cancelled',
-      amount: 600
-    },
-    {
-      id: '4',
-      requestId: 'REQ-2024-004',
-      service: 'Event',
-      fromLocation: 'Whitefield',
-      toLocation: 'Indiranagar',
-      date: '2024-12-20',
-      status: 'pending'
+  const [bookings, setBookings] = useState<BookingHistory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadBookingHistory = async () => {
+      try {
+        // Get current user info from JWT
+        const currentUserResponse = await apiService.getCurrentUser();
+        if (!currentUserResponse.success) {
+          throw new Error('Failed to get user info');
+        }
+        
+        const mobile = currentUserResponse.data.mobile;
+        
+        // Fetch customer leads from API using mobile number
+        const leadsResponse = await apiService.getCustomerLeadsByMobile(mobile);
+        if (leadsResponse.success) {
+          // Map leads to booking history format
+          const mappedBookings = leadsResponse.data.map((lead: any) => ({
+            id: lead.id?.toString() || lead.requestId,
+            requestId: lead.requestId,
+            service: lead.serviceCategory || 'Service',
+            fromLocation: lead.fromLocation,
+            toLocation: lead.toLocation,
+            date: lead.createdAt,
+            status: mapLeadStatusToBookingStatus(lead.status),
+            driverName: undefined, // Not available in lead data
+            amount: undefined // Not available in lead data
+          }));
+          setBookings(mappedBookings);
+        } else {
+          setBookings([]);
+        }
+      } catch (error) {
+        console.error('Failed to load booking history:', error);
+        setBookings([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadBookingHistory();
+  }, []);
+
+  const mapLeadStatusToBookingStatus = (leadStatus: string): 'completed' | 'cancelled' | 'pending' | 'in-progress' => {
+    switch (leadStatus?.toUpperCase()) {
+      case 'CONVERTED_TO_TRIP':
+      case 'COMPLETED':
+        return 'completed';
+      case 'CANCELLED_BY_CUSTOMER':
+      case 'CANCELLED_BY_DRIVER':
+      case 'REJECTED_BY_ADMIN':
+        return 'cancelled';
+      case 'ACCEPTED_BY_DRIVER':
+      case 'SENT_TO_DRIVERS':
+        return 'in-progress';
+      default:
+        return 'pending';
     }
-  ];
+  };
 
   const filteredBookings = bookings.filter(booking => 
     activeFilter === 'all' || booking.status === activeFilter
@@ -121,7 +138,12 @@ export const DashboardHistory: React.FC = () => {
 
       {/* Bookings List */}
       <div className="bookings-list">
-        {filteredBookings.length === 0 ? (
+        {isLoading ? (
+          <div className="loading-state">
+            <div className="loading-spinner">🔄</div>
+            <p>Loading booking history...</p>
+          </div>
+        ) : filteredBookings.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">📋</div>
             <h3>No bookings found</h3>
@@ -191,21 +213,32 @@ export const DashboardHistory: React.FC = () => {
               </div>
 
               <div className="booking-actions">
-                {booking.status === 'completed' && (
-                  <>
-                    <button className="action-btn secondary">View Receipt</button>
-                    <button className="action-btn primary">Book Again</button>
-                  </>
-                )}
-                {booking.status === 'pending' && (
-                  <>
-                    <button className="action-btn danger">Cancel</button>
-                    <button className="action-btn primary">View Details</button>
-                  </>
-                )}
-                {booking.status === 'cancelled' && (
-                  <button className="action-btn primary">Book Again</button>
-                )}
+                <button 
+                  className="action-btn secondary"
+                  onClick={() => window.location.href = `/booking-status/${booking.requestId}`}
+                >
+                  View
+                </button>
+                <button 
+                  className="action-btn primary"
+                  onClick={() => {
+                    // Store booking data for rebooking
+                    const rebookData = {
+                      fromLocation: booking.fromLocation,
+                      toLocation: booking.toLocation,
+                      serviceCategory: booking.service,
+                      serviceType: booking.service,
+                      serviceDuration: '1 hour',
+                      vehicleType: 'car',
+                      selectedTiming: 'now'
+                    };
+                    sessionStorage.setItem('bookingPreviewData', JSON.stringify(rebookData));
+                    window.location.href = '/booking-preview';
+                  }}
+                >
+                  Book Again
+                </button>
+                <button className="action-btn secondary">Support Request</button>
               </div>
             </div>
           ))
@@ -427,6 +460,26 @@ export const DashboardHistory: React.FC = () => {
         .empty-state p {
           color: #6b7280;
           margin: 0;
+        }
+
+        .loading-state {
+          text-align: center;
+          padding: 3rem 1rem;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          color: #666;
+        }
+
+        .loading-spinner {
+          font-size: 2rem;
+          animation: spin 1s linear infinite;
+          margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
 
         @media (max-width: 480px) {
