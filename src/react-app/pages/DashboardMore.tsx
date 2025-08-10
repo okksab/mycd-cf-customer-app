@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/apiService';
+import { useAuthStore } from '../stores/authStore';
 
 export const DashboardMore: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'subscription' | 'notifications' | 'profile'>('subscription');
@@ -70,6 +71,22 @@ export const DashboardMore: React.FC = () => {
     const diffTime = validTill.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
+  };
+
+  const { logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    console.log('Logout button clicked');
+    try {
+      console.log('Calling logout...');
+      await logout();
+      console.log('Logout successful, redirecting...');
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Force logout even if API call fails
+      window.location.href = '/';
+    }
   };
 
   const renderSubscriptionTab = () => (
@@ -215,7 +232,7 @@ export const DashboardMore: React.FC = () => {
               <h4>Account Information</h4>
               <div className="info-item">
                 <span className="info-label">Customer ID:</span>
-                <span className="info-value">{profileData.customerId}</span>
+                <span className="info-value">{profileData.customerIdCode || profileData.customerId}</span>
               </div>
               <div className="info-item">
                 <span className="info-label">Member Since:</span>
@@ -240,7 +257,7 @@ export const DashboardMore: React.FC = () => {
                 <span className="action-icon">❓</span>
                 <span>Help & Support</span>
               </button>
-              <button className="profile-action-btn logout">
+              <button className="profile-action-btn logout" onClick={handleLogout}>
                 <span className="action-icon">🚪</span>
                 <span>Logout</span>
               </button>
