@@ -17,7 +17,14 @@ export const LoginFlow: React.FC = () => {
     
     // Only navigate if login was successful (no error in store)
     if (!useAuthStore.getState().error) {
-      navigate('/dashboard');
+      // Check if there's a redirect URL in sessionStorage
+      const redirectTo = sessionStorage.getItem('redirectAfterLogin');
+      if (redirectTo) {
+        sessionStorage.removeItem('redirectAfterLogin');
+        navigate(redirectTo);
+      } else {
+        navigate('/dashboard');
+      }
     }
   };
 

@@ -18,7 +18,14 @@ import './styles/globals.css';
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
-  return isAuthenticated ? <>{children}</> : <Navigate to="/" replace />;
+  
+  if (!isAuthenticated) {
+    // Store current URL for redirect after login
+    sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
 };
 
 // Auth Route Component
@@ -40,7 +47,7 @@ function App() {
   }, [initAuth]);
   
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="app">
         <main className="app-main">
           <Routes>

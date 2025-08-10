@@ -83,6 +83,11 @@ export const BookingPreview: React.FC = () => {
 
   return (
     <div className="booking-preview">
+      <div className="logo-container">
+        <img src="/logo.png" alt="MyCallDriver" className="brand-logo" onError={(e) => {
+          (e.target as HTMLImageElement).style.display = 'none';
+        }} />
+      </div>
       <div className="preview-header">
         <h2>📋 Review Your Booking Request</h2>
         <p>Please review all details before confirming your booking</p>
@@ -170,6 +175,18 @@ export const BookingPreview: React.FC = () => {
           max-width: 600px;
           margin: 0 auto;
           padding: 1rem;
+        }
+
+        .logo-container {
+          text-align: center;
+          margin-bottom: 2rem;
+          padding-top: 1rem;
+        }
+
+        .brand-logo {
+          height: 80px;
+          max-width: 300px;
+          object-fit: contain;
         }
 
         .preview-header {
