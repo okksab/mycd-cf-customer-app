@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { AdBanner } from '../components/AdBanner';
@@ -7,15 +7,89 @@ import { RecentRequestsCarousel } from '../components/RecentRequestsCarousel';
 export const DashboardHome: React.FC = () => {
   const { user } = useAuthStore();
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Simulate map loading
-    const timer = setTimeout(() => {
-      setMapLoaded(true);
-    }, 1000);
-
-    return () => clearTimeout(timer);
+    // Get user's current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+          loadMap(latitude, longitude);
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          setLocationError('Location access denied. Using default location.');
+          // Default to Bangalore coordinates
+          const defaultLat = 12.9716;
+          const defaultLng = 77.5946;
+          setUserLocation({ lat: defaultLat, lng: defaultLng });
+          loadMap(defaultLat, defaultLng);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+      );
+    } else {
+      setLocationError('Geolocation not supported');
+      // Default to Bangalore coordinates
+      const defaultLat = 12.9716;
+      const defaultLng = 77.5946;
+      setUserLocation({ lat: defaultLat, lng: defaultLng });
+      loadMap(defaultLat, defaultLng);
+    }
   }, []);
+
+  const loadMap = (lat: number, lng: number) => {
+    if (!mapRef.current) return;
+
+    // Create map container
+    const mapContainer = mapRef.current;
+    mapContainer.innerHTML = '';
+
+    // Create Leaflet map
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = () => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+
+      // Initialize map
+      const L = (window as any).L;
+      const map = L.map(mapContainer).setView([lat, lng], 15);
+
+      // Add OSM tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      // Add user location marker
+      const userIcon = L.divIcon({
+        html: '<div style="background: #007bff; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>',
+        iconSize: [20, 20],
+        className: 'user-location-marker'
+      });
+
+      L.marker([lat, lng], { icon: userIcon })
+        .addTo(map)
+        .bindPopup('📍 Your Location')
+        .openPopup();
+
+      // Add accuracy circle
+      L.circle([lat, lng], {
+        color: '#007bff',
+        fillColor: '#007bff',
+        fillOpacity: 0.1,
+        radius: 100
+      }).addTo(map);
+
+      setMapLoaded(true);
+    };
+    document.head.appendChild(script);
+  };
 
   return (
     <div className="dashboard-home">
@@ -50,15 +124,14 @@ export const DashboardHome: React.FC = () => {
             <div className="map-placeholder">
               <div className="loading-spinner">🔄</div>
               <p>Loading map...</p>
+              {locationError && <p className="location-error">{locationError}</p>}
             </div>
-          ) : (
-            <div className="osm-map">
-              <div className="map-content">
-                <p>🗺️ Interactive map would be displayed here</p>
-                <p>Showing nearby drivers and your location</p>
-              </div>
-            </div>
-          )}
+          ) : null}
+          <div 
+            ref={mapRef} 
+            className="osm-map" 
+            style={{ display: mapLoaded ? 'block' : 'none' }}
+          ></div>
         </div>
       </div>
 
@@ -210,10 +283,6 @@ export const DashboardHome: React.FC = () => {
           border-radius: 8px;
           position: relative;
           z-index: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
         }
 
         .map-content {
@@ -230,6 +299,12 @@ export const DashboardHome: React.FC = () => {
           font-size: 2rem;
           animation: spin 1s linear infinite;
           margin-bottom: 0.5rem;
+        }
+
+        .location-error {
+          color: #dc3545;
+          font-size: 0.8rem;
+          margin-top: 0.5rem;
         }
 
         @keyframes spin {
