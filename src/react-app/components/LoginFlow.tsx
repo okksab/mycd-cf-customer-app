@@ -13,11 +13,11 @@ export const LoginFlow: React.FC = () => {
   const handleLogin = async () => {
     if (!/^[6-9]\d{9}$/.test(formData.mobile) || formData.pin.length !== 4) return;
     
-    try {
-      await loginWithPIN(formData.mobile, formData.pin);
+    await loginWithPIN(formData.mobile, formData.pin);
+    
+    // Only navigate if login was successful (no error in store)
+    if (!useAuthStore.getState().error) {
       navigate('/dashboard');
-    } catch (error) {
-      console.error('Login failed:', error);
     }
   };
 

@@ -24,17 +24,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       {/* Top Navigation */}
       <nav className="top-nav">
         <div className="nav-brand">
-          <h1>Welcome, {displayName}</h1>
+          <img src="/logo.png" alt="MyCallDriver" className="brand-logo" />
         </div>
-        <div className="nav-user">
-          {user?.profile_picture ? (
-            <img src={user.profile_picture} className="user-avatar" alt={user.name} />
-          ) : (
-            <div className="user-avatar-placeholder">
-              {displayName.charAt(0) || 'U'}
-            </div>
-          )}
-        </div>
+
       </nav>
 
       {/* Main Content */}
@@ -93,45 +85,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           padding: 0.875rem 1rem;
           box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
           display: flex;
-          justify-content: space-between;
+          justify-content: center;
           align-items: center;
           position: sticky;
           top: 0;
           z-index: 100;
         }
 
-        .nav-brand h1 {
-          color: #003B71;
-          font-size: 1.125rem;
-          font-weight: 700;
-          margin: 0;
+        .brand-logo {
+          height: 80px;
+          max-width: 300px;
+          object-fit: contain;
         }
 
-        .nav-user {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
 
-        .user-avatar {
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          object-fit: cover;
-        }
-
-        .user-avatar-placeholder {
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          background: #F58220;
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 600;
-          font-size: 0.8rem;
-        }
 
         .main-content {
           flex: 1;
@@ -244,8 +211,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             padding: 0.75rem;
           }
           
-          .nav-brand h1 {
-            font-size: 1.1rem;
+          .brand-logo {
+            height: 68px;
+            max-width: 240px;
           }
           
           .main-content {

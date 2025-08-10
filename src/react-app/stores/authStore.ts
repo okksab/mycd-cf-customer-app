@@ -144,13 +144,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Login with PIN via backend (sets httpOnly cookie)
       const response = await apiService.loginWithPin(mobile, pin) as any;
       
-      console.log('DEBUG: Login response:', response);
-      
       // Check if login was successful
       if (!response.success) {
         const errorMessage = response.message || 'Login failed';
         set({ error: errorMessage, isLoading: false });
-        throw new Error(errorMessage);
+        return; // Don't throw for business logic errors
       }
       
       // Set user as authenticated with backend response
@@ -166,7 +164,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Preserve the specific error message from backend
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
       set({ error: errorMessage, isLoading: false });
-      throw error;
+      // Only throw for unexpected errors, not business logic errors
+      if (!errorMessage.includes('not registered') && !errorMessage.includes('MOBILE_NOT_FOUND')) {
+        throw error;
+      }
     }
   },
 
