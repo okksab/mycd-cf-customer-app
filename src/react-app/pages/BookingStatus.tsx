@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/apiService';
+import { DashboardLayout } from '../components/DashboardLayout';
 
 export const BookingStatus: React.FC = () => {
   const [leadData, setLeadData] = useState<any>(null);
@@ -86,7 +87,8 @@ export const BookingStatus: React.FC = () => {
   }
 
   return (
-    <div className="booking-status">
+    <DashboardLayout>
+      <div className="booking-status">
       <div className="logo-container">
         <img src="/logo.png" alt="MyCallDriver" className="brand-logo" onError={(e) => {
           (e.target as HTMLImageElement).style.display = 'none';
@@ -333,6 +335,7 @@ export const BookingStatus: React.FC = () => {
           }
         }
       `}</style>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
