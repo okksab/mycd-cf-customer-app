@@ -44,9 +44,20 @@ export const DashboardBook: React.FC = () => {
     }
     
     // Validate timing
-    if (selectedTiming === 'scheduled' && !formData.scheduledTime) {
-      alert('Please select scheduled date and time');
-      return;
+    if (selectedTiming === 'scheduled') {
+      if (!formData.scheduledTime) {
+        alert('Please select scheduled date and time');
+        return;
+      }
+      
+      // Validate scheduled time is at least 1 hour from now
+      const scheduledDate = new Date(formData.scheduledTime);
+      const minTime = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
+      
+      if (scheduledDate < minTime) {
+        alert('Scheduled time must be at least 1 hour from now');
+        return;
+      }
     }
     
     // Store booking data in sessionStorage and navigate to preview page
@@ -152,15 +163,20 @@ export const DashboardBook: React.FC = () => {
             </label>
           </div>
 
-          <div className="form-group">
-            <label>Scheduled Time (if applicable)</label>
-            <input
-              type="datetime-local"
-              className="form-input"
-              value={formData.scheduledTime}
-              onChange={(e) => handleInputChange('scheduledTime', e.target.value)}
-            />
-          </div>
+          {selectedTiming === 'scheduled' && (
+            <div className="form-group scheduled-time-group">
+              <label>Select Date & Time</label>
+              <input
+                type="datetime-local"
+                className="form-input"
+                value={formData.scheduledTime}
+                onChange={(e) => handleInputChange('scheduledTime', e.target.value)}
+                min={new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16)} // Minimum 1 hour from now
+                required
+              />
+              <small className="help-text">Select a date and time at least 1 hour from now</small>
+            </div>
+          )}
         </div>
 
         {/* Special Requirements */}
@@ -303,6 +319,22 @@ export const DashboardBook: React.FC = () => {
         .radio-label {
           font-weight: 500;
           color: #374151;
+        }
+
+        .scheduled-time-group {
+          background: #f8f9fa;
+          padding: 1rem;
+          border-radius: 8px;
+          border: 1px solid #e9ecef;
+          margin-top: 1rem;
+        }
+
+        .help-text {
+          display: block;
+          font-size: 0.8rem;
+          color: #6b7280;
+          margin-top: 0.5rem;
+          font-style: italic;
         }
 
         .submit-btn {
