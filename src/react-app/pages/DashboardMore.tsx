@@ -14,6 +14,14 @@ export const DashboardMore: React.FC = () => {
   
   // Profile data
   const [profileData, setProfileData] = useState<any>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    firstName: '',
+    lastName: '',
+    gender: '',
+    dateOfBirth: '',
+    email: ''
+  });
 
   useEffect(() => {
     loadTabData();
@@ -48,6 +56,14 @@ export const DashboardMore: React.FC = () => {
         const currentUserResponse = await apiService.getCurrentUser();
         if (currentUserResponse.success) {
           setProfileData(currentUserResponse.data);
+          // Initialize edit form with current data
+          setEditFormData({
+            firstName: currentUserResponse.data.firstName || '',
+            lastName: currentUserResponse.data.lastName || '',
+            gender: currentUserResponse.data.gender || '',
+            dateOfBirth: currentUserResponse.data.dateOfBirth || '',
+            email: currentUserResponse.data.email || ''
+          });
         }
         setIsLoading(false);
       }
@@ -74,6 +90,38 @@ export const DashboardMore: React.FC = () => {
   };
 
   const { logout } = useAuthStore();
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      const response = await apiService.updateProfile({
+        firstName: editFormData.firstName,
+        lastName: editFormData.lastName,
+        gender: editFormData.gender,
+        dateOfBirth: editFormData.dateOfBirth,
+        email: editFormData.email
+      });
+      
+      if (response.success) {
+        // Update local profile data
+        setProfileData(prev => ({
+          ...prev,
+          firstName: editFormData.firstName,
+          lastName: editFormData.lastName,
+          gender: editFormData.gender,
+          dateOfBirth: editFormData.dateOfBirth,
+          email: editFormData.email
+        }));
+        setShowEditModal(false);
+      }
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     console.log('Logout button clicked');
@@ -230,32 +278,68 @@ export const DashboardMore: React.FC = () => {
           <div className="profile-sections">
             <div className="profile-section">
               <h4>Account Information</h4>
-              <div className="info-item">
-                <span className="info-label">Customer ID:</span>
-                <span className="info-value">{profileData.customerIdCode || profileData.customerId}</span>
-              </div>
+              {(profileData.customerIdCode || profileData.customerId) && (
+                <div className="info-item">
+                  <span className="info-label">Customer ID:</span>
+                  <span className="info-value">{profileData.customerIdCode || profileData.customerId}</span>
+                </div>
+              )}
+              {profileData.firstName && (
+                <div className="info-item">
+                  <span className="info-label">First Name:</span>
+                  <span className="info-value">{profileData.firstName}</span>
+                </div>
+              )}
+              {profileData.lastName && (
+                <div className="info-item">
+                  <span className="info-label">Last Name:</span>
+                  <span className="info-value">{profileData.lastName}</span>
+                </div>
+              )}
+              {profileData.cityPincode && (
+                <div className="info-item">
+                  <span className="info-label">City:</span>
+                  <span className="info-value">{profileData.cityPincode}</span>
+                </div>
+              )}
+              {profileData.dateOfBirth && (
+                <div className="info-item">
+                  <span className="info-label">Date of Birth:</span>
+                  <span className="info-value">{formatDate(profileData.dateOfBirth)}</span>
+                </div>
+              )}
+              {profileData.email && (
+                <div className="info-item">
+                  <span className="info-label">Email:</span>
+                  <span className="info-value">{profileData.email}</span>
+                </div>
+              )}
+              {profileData.gender && (
+                <div className="info-item">
+                  <span className="info-label">Gender:</span>
+                  <span className="info-value">{profileData.gender.charAt(0).toUpperCase() + profileData.gender.slice(1)}</span>
+                </div>
+              )}
+              {profileData.customerType && (
+                <div className="info-item">
+                  <span className="info-label">Account Type:</span>
+                  <span className="info-value">{profileData.customerType}</span>
+                </div>
+              )}
               <div className="info-item">
                 <span className="info-label">Member Since:</span>
-                <span className="info-value">Dec 2024</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Account Type:</span>
-                <span className="info-value">{profileData.customerType}</span>
+                <span className="info-value">{profileData.createdAt ? formatDate(profileData.createdAt) : 'Dec 2024'}</span>
               </div>
             </div>
 
             <div className="profile-actions">
-              <button className="profile-action-btn">
+              <button className="profile-action-btn" onClick={() => setShowEditModal(true)}>
                 <span className="action-icon">✏️</span>
                 <span>Edit Profile</span>
               </button>
               <button className="profile-action-btn">
                 <span className="action-icon">🔒</span>
                 <span>Change PIN</span>
-              </button>
-              <button className="profile-action-btn">
-                <span className="action-icon">❓</span>
-                <span>Help & Support</span>
               </button>
               <button className="profile-action-btn logout" onClick={handleLogout}>
                 <span className="action-icon">🚪</span>
@@ -317,6 +401,83 @@ export const DashboardMore: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>✏️ Edit Profile</h3>
+              <button className="close-btn" onClick={() => setShowEditModal(false)}>×</button>
+            </div>
+            
+            <form onSubmit={handleSaveProfile} className="edit-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>First Name *</label>
+                  <input
+                    type="text"
+                    value={editFormData.firstName}
+                    onChange={(e) => setEditFormData(prev => ({...prev, firstName: e.target.value}))}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Last Name *</label>
+                  <input
+                    type="text"
+                    value={editFormData.lastName}
+                    onChange={(e) => setEditFormData(prev => ({...prev, lastName: e.target.value}))}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Gender</label>
+                  <select
+                    value={editFormData.gender}
+                    onChange={(e) => setEditFormData(prev => ({...prev, gender: e.target.value}))}
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Date of Birth</label>
+                  <input
+                    type="date"
+                    value={editFormData.dateOfBirth}
+                    onChange={(e) => setEditFormData(prev => ({...prev, dateOfBirth: e.target.value}))}
+                  />
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={editFormData.email}
+                  onChange={(e) => setEditFormData(prev => ({...prev, email: e.target.value}))}
+                  placeholder="Enter your email address"
+                />
+              </div>
+              
+              <div className="modal-actions">
+                <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-save" disabled={isLoading}>
+                  {isLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <style jsx="true">{`
         .dashboard-more {
@@ -900,6 +1061,155 @@ export const DashboardMore: React.FC = () => {
         .profile-loading {
           text-align: center;
           padding: 2rem;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 1rem;
+        }
+
+        .modal-content {
+          background: white;
+          border-radius: 16px;
+          width: 100%;
+          max-width: 500px;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem;
+          border-bottom: 1px solid #f1f5f9;
+        }
+
+        .modal-header h3 {
+          margin: 0;
+          color: #1e293b;
+          font-size: 1.2rem;
+        }
+
+        .close-btn {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          color: #64748b;
+          cursor: pointer;
+          padding: 0.25rem;
+          border-radius: 4px;
+        }
+
+        .close-btn:hover {
+          background: #f1f5f9;
+        }
+
+        .edit-form {
+          padding: 1.5rem;
+        }
+
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          margin-bottom: 1rem;
+        }
+
+        .form-group {
+          margin-bottom: 1rem;
+        }
+
+        .form-group label {
+          display: block;
+          margin-bottom: 0.5rem;
+          color: #374151;
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+          width: 100%;
+          padding: 0.75rem;
+          border: 2px solid #e5e7eb;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+          outline: none;
+          border-color: #F28C00;
+          box-shadow: 0 0 0 3px rgba(242, 140, 0, 0.1);
+        }
+
+        .modal-actions {
+          display: flex;
+          gap: 1rem;
+          justify-content: flex-end;
+          margin-top: 2rem;
+          padding-top: 1rem;
+          border-top: 1px solid #f1f5f9;
+        }
+
+        .btn-cancel {
+          padding: 0.75rem 1.5rem;
+          background: #f8fafc;
+          border: 2px solid #e2e8f0;
+          border-radius: 8px;
+          color: #64748b;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .btn-cancel:hover {
+          background: #f1f5f9;
+          border-color: #cbd5e1;
+        }
+
+        .btn-save {
+          padding: 0.75rem 1.5rem;
+          background: #F28C00;
+          border: 2px solid #F28C00;
+          border-radius: 8px;
+          color: white;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .btn-save:hover:not(:disabled) {
+          background: #e6741d;
+          border-color: #e6741d;
+        }
+
+        .btn-save:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        @media (max-width: 480px) {
+          .form-row {
+            grid-template-columns: 1fr;
+          }
+          
+          .modal-actions {
+            flex-direction: column;
+          }
         }
 
         @media (max-width: 480px) {

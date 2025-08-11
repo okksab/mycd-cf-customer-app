@@ -212,6 +212,14 @@ class ApiService {
       credentials: 'include', // Include cookies
     });
   }
+
+  async updateProfile(profileData: any) {
+    return this.request('/api/v1/customer/profile/update', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+      credentials: 'include', // Include cookies
+    });
+  }
 }
 
 export const apiService = new ApiService();
