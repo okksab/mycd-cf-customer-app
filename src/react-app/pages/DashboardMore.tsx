@@ -8,6 +8,8 @@ export const DashboardMore: React.FC = () => {
   
   // Subscription data
   const [currentPlan, setCurrentPlan] = useState<any>(null);
+  const [availablePlans, setAvailablePlans] = useState<any[]>([]);
+  const [showPlansModal, setShowPlansModal] = useState(false);
   
   // Notifications data
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -38,16 +40,56 @@ export const DashboardMore: React.FC = () => {
     setIsLoading(true);
     try {
       if (activeTab === 'subscription') {
-        // Mock subscription data
-        setTimeout(() => {
-          setCurrentPlan({
-            name: 'Premium Plan',
-            price: 299,
-            validTill: '2025-01-15',
-            features: ['Free cancellations: 5/month', 'Chat & Voice access', 'Manual driver selection']
-          });
-          setIsLoading(false);
-        }, 500);
+        try {
+          const currentUserResponse = await apiService.getCurrentUser();
+          console.log('Current user response:', currentUserResponse);
+          console.log('Current subscription plan ID:', currentUserResponse.data?.currentSubscriptionPlanId);
+          
+          if (currentUserResponse.success && currentUserResponse.data.currentSubscriptionPlanId) {
+            console.log('Fetching plan ID:', currentUserResponse.data.currentSubscriptionPlanId);
+            const subscriptionResponse = await apiService.getSubscriptionPlan(currentUserResponse.data.currentSubscriptionPlanId);
+            console.log('Subscription response:', subscriptionResponse);
+            
+            if (subscriptionResponse.success) {
+              const features = [
+                `Free cancellations: ${subscriptionResponse.data.freeCancellationsPerMonth}/month`,
+                subscriptionResponse.data.chatAccess ? 'Chat access' : 'No chat access',
+                subscriptionResponse.data.voiceAccess ? 'Voice access' : 'No voice access',
+                subscriptionResponse.data.manualDriverSelection ? 'Manual driver selection' : 'Auto driver assignment'
+              ];
+              
+              // For Pay-As-You-Go plan (ID: 1), add flat service fee
+              if (currentUserResponse.data.currentSubscriptionPlanId === 1) {
+                try {
+                  const settingsResponse = await apiService.getSettings('subscription_config');
+                  if (settingsResponse.success && settingsResponse.data.flat_service_fee) {
+                    features.push(`Flat Service Fee: ₹${settingsResponse.data.flat_service_fee}`);
+                  }
+                } catch (error) {
+                  console.log('Failed to load settings, using default fee');
+                  features.push('Flat Service Fee: ₹50');
+                }
+              }
+              
+              setCurrentPlan({
+                name: subscriptionResponse.data.planName,
+                price: subscriptionResponse.data.price,
+                validTill: currentUserResponse.data.subscriptionValidTill,
+                features: features
+              });
+            } else {
+              console.log('Failed to fetch subscription plan');
+              setCurrentPlan(null);
+            }
+          } else {
+            console.log('No current subscription plan ID found. User data:', currentUserResponse.data);
+            setCurrentPlan(null);
+          }
+        } catch (error) {
+          console.error('Error loading subscription:', error);
+          setCurrentPlan(null);
+        }
+        setIsLoading(false);
       } else if (activeTab === 'notifications') {
         // Mock notifications data
         setTimeout(() => {
@@ -128,6 +170,29 @@ export const DashboardMore: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadAvailablePlans = async () => {
+    setIsLoading(true);
+    try {
+      const response = await apiService.getAvailableSubscriptionPlans();
+      if (response.success) {
+        // Handle Flux response - convert to array
+        const plansArray = Array.isArray(response.data) ? response.data : [];
+        setAvailablePlans(plansArray);
+        setShowPlansModal(true);
+      }
+    } catch (error) {
+      console.error('Failed to load plans:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const selectPlan = async (plan: any) => {
+    console.log('Selected plan:', plan);
+    alert(`You selected ${plan.planName} for ₹${plan.price}/month`);
+    setShowPlansModal(false);
   };
 
   const handleChangePin = async (e: React.FormEvent) => {
@@ -229,27 +294,14 @@ export const DashboardMore: React.FC = () => {
             </div>
           </div>
 
-          <div className="subscription-actions">
-            <button className="subscription-action-btn">
-              <span className="action-icon">📊</span>
-              <span>Usage Statistics</span>
-            </button>
-            <button className="subscription-action-btn">
-              <span className="action-icon">💳</span>
-              <span>Payment History</span>
-            </button>
-            <button className="subscription-action-btn">
-              <span className="action-icon">❓</span>
-              <span>Plan Help</span>
-            </button>
-          </div>
+
         </>
       ) : (
         <div className="no-subscription">
           <div className="no-sub-icon">⭐</div>
           <h3>No Active Subscription</h3>
           <p>Subscribe to enjoy premium features</p>
-          <button className="action-btn primary">View Plans</button>
+          <button className="action-btn primary" onClick={() => loadAvailablePlans()}>View Plans</button>
         </div>
       )}
     </div>
@@ -533,6 +585,42 @@ export const DashboardMore: React.FC = () => {
         </div>
       )}
 
+      {/* Available Plans Modal */}
+      {showPlansModal && (
+        <div className="modal-overlay" onClick={() => setShowPlansModal(false)}>
+          <div className="modal-content plans-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>⭐ Choose Your Plan</h3>
+              <button className="close-btn" onClick={() => setShowPlansModal(false)}>×</button>
+            </div>
+            
+            <div className="plans-grid">
+              {Array.isArray(availablePlans) && availablePlans.map(plan => (
+                <div key={plan.id} className="plan-card">
+                  <div className="plan-header">
+                    <h4>{plan.planName}</h4>
+                    <div className="plan-price">₹{plan.price}<span>/month</span></div>
+                  </div>
+                  
+                  <div className="plan-features">
+                    <div className="feature">✅ {plan.freeCancellationsPerMonth} free cancellations/month</div>
+                    <div className="feature">{plan.chatAccess ? '✅' : '❌'} Chat access</div>
+                    <div className="feature">{plan.voiceAccess ? '✅' : '❌'} Voice access</div>
+                    <div className="feature">{plan.manualDriverSelection ? '✅' : '❌'} Manual driver selection</div>
+                    {plan.earlyFeatureAccess && <div className="feature">✅ Early feature access</div>}
+                    {plan.personalizedSupport && <div className="feature">✅ Personalized support</div>}
+                  </div>
+                  
+                  <button className="select-plan-btn" onClick={() => selectPlan(plan)}>
+                    Select Plan
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Change PIN Modal */}
       {showChangePinModal && (
         <div className="modal-overlay" onClick={() => setShowChangePinModal(false)}>
@@ -707,12 +795,12 @@ export const DashboardMore: React.FC = () => {
 
         /* Subscription Tab Styles */
         .current-plan-card {
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          background: linear-gradient(135deg, #F28C00 0%, #e6741d 100%);
           color: white;
           border-radius: 16px;
           padding: 2rem;
           margin-bottom: 2rem;
-          box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+          box-shadow: 0 8px 24px rgba(242, 140, 0, 0.2);
         }
 
         .plan-header {
@@ -726,11 +814,13 @@ export const DashboardMore: React.FC = () => {
           margin: 0 0 0.5rem 0;
           font-size: 1.2rem;
           font-weight: 700;
+          color: white;
         }
 
         .plan-price {
           font-size: 1rem;
-          opacity: 0.9;
+          color: white;
+          font-weight: 600;
         }
 
         .plan-status {
@@ -813,7 +903,7 @@ export const DashboardMore: React.FC = () => {
 
         .action-btn.primary {
           background: white;
-          color: #10b981;
+          color: #F28C00;
         }
 
         .action-btn.secondary {
@@ -866,12 +956,24 @@ export const DashboardMore: React.FC = () => {
         .no-subscription {
           text-align: center;
           padding: 2rem;
+          background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+          border-radius: 16px;
+          border: 2px solid #F28C00;
         }
 
         .no-sub-icon {
           font-size: 3rem;
           margin-bottom: 1rem;
-          opacity: 0.5;
+          color: #F28C00;
+        }
+
+        .no-subscription h3 {
+          color: #F28C00;
+          margin-bottom: 0.5rem;
+        }
+
+        .no-subscription p {
+          color: #ea580c;
         }
 
         /* Notifications Tab Styles */
@@ -1350,6 +1452,83 @@ export const DashboardMore: React.FC = () => {
           font-size: 0.9rem;
           margin-bottom: 1rem;
           text-align: center;
+        }
+
+        .plans-modal {
+          max-width: 900px;
+          max-height: 80vh;
+        }
+
+        .plans-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 1.5rem;
+          padding: 1.5rem;
+        }
+
+        .plan-card {
+          border: 2px solid #e5e7eb;
+          border-radius: 12px;
+          padding: 1.5rem;
+          text-align: center;
+          transition: all 0.3s ease;
+        }
+
+        .plan-card:hover {
+          border-color: #F28C00;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(242, 140, 0, 0.15);
+        }
+
+        .plan-header h4 {
+          margin: 0 0 0.5rem 0;
+          color: #1f2937;
+          font-size: 1.2rem;
+        }
+
+        .plan-price {
+          font-size: 2rem;
+          font-weight: 700;
+          color: white;
+          margin-bottom: 1rem;
+        }
+
+        .plan-price span {
+          font-size: 0.9rem;
+          color: white;
+        }
+
+        .plan-features {
+          text-align: left;
+          margin-bottom: 1.5rem;
+        }
+
+        .feature {
+          padding: 0.5rem 0;
+          font-size: 0.9rem;
+          color: #374151;
+          border-bottom: 1px solid #f3f4f6;
+        }
+
+        .feature:last-child {
+          border-bottom: none;
+        }
+
+        .select-plan-btn {
+          width: 100%;
+          padding: 0.75rem;
+          background: #F28C00;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .select-plan-btn:hover {
+          background: #e6741d;
+          transform: translateY(-1px);
         }
 
         @media (max-width: 480px) {

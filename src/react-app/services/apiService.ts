@@ -228,6 +228,27 @@ class ApiService {
       credentials: 'include', // Include cookies
     });
   }
+
+  async getSubscriptionPlan(planId: number) {
+    return this.request(`/api/v1/customer/subscription-plans/${planId}`, {
+      method: 'GET',
+      credentials: 'include', // Include cookies
+    });
+  }
+
+  async getAvailableSubscriptionPlans() {
+    return this.request('/api/v1/customer/subscription-plans', {
+      method: 'GET',
+      credentials: 'include', // Include cookies
+    });
+  }
+
+  async getSettings(group: string) {
+    return this.request(`/api/v1/customer/settings/${group}`, {
+      method: 'GET',
+      credentials: 'include', // Include cookies
+    });
+  }
 }
 
 export const apiService = new ApiService();
