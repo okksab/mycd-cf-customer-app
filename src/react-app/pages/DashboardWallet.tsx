@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../services/apiService';
+import { WalletTopup } from './WalletTopup';
 
 export const DashboardWallet: React.FC = () => {
   const [walletBalance, setWalletBalance] = useState(0);
@@ -8,6 +9,7 @@ export const DashboardWallet: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('recent');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [showTopup, setShowTopup] = useState(false);
 
   const ads = [
     {
@@ -57,6 +59,10 @@ export const DashboardWallet: React.FC = () => {
     console.log(`Loading transactions for period: ${period}`);
   };
 
+  if (showTopup) {
+    return <WalletTopup onBack={() => setShowTopup(false)} />;
+  }
+
   return (
     <div className="dashboard-wallet">
       <div className="wallet-header">
@@ -78,7 +84,7 @@ export const DashboardWallet: React.FC = () => {
           )}
         </div>
         <div className="balance-actions">
-          <button className="action-btn primary">Add Money</button>
+          <button className="action-btn primary" onClick={() => setShowTopup(true)}>Add Money</button>
         </div>
       </div>
 
