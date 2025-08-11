@@ -249,6 +249,14 @@ class ApiService {
       credentials: 'include', // Include cookies
     });
   }
+
+  async changeSubscriptionPlan(planId: number) {
+    return this.request('/api/v1/customer/change-subscription-plan', {
+      method: 'PUT',
+      body: JSON.stringify({ planId }),
+      credentials: 'include', // Include cookies
+    });
+  }
 }
 
 export const apiService = new ApiService();

@@ -183,9 +183,23 @@ export const DashboardMore: React.FC = () => {
   };
 
   const selectPlan = async (plan: any) => {
-    console.log('Selected plan:', plan);
-    alert(`You selected ${plan.planName} for ₹${plan.price}/month`);
-    setShowPlansModal(false);
+    setIsLoading(true);
+    try {
+      const response = await apiService.changeSubscriptionPlan(plan.id);
+      if (response.success) {
+        setShowPlansModal(false);
+        // Reload subscription data to reflect changes
+        loadTabData();
+        alert(`Successfully changed to ${plan.planName}!`);
+      } else {
+        alert(`Failed to change plan: ${response.message}`);
+      }
+    } catch (error: any) {
+      console.error('Failed to change subscription plan:', error);
+      alert('Failed to change subscription plan. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChangePin = async (e: React.FormEvent) => {
