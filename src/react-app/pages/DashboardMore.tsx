@@ -378,13 +378,14 @@ export const DashboardMore: React.FC = () => {
 
         .tab-container {
           background: white;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-          min-height: 400px;
+          border-radius: 16px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+          min-height: 500px;
+          border: 1px solid #f1f5f9;
         }
 
         .tab-content {
-          padding: 1.5rem;
+          padding: 2rem;
         }
 
         .loading-state {
@@ -408,9 +409,10 @@ export const DashboardMore: React.FC = () => {
         .current-plan-card {
           background: linear-gradient(135deg, #10b981 0%, #059669 100%);
           color: white;
-          border-radius: 12px;
-          padding: 1.5rem;
-          margin-bottom: 1.5rem;
+          border-radius: 16px;
+          padding: 2rem;
+          margin-bottom: 2rem;
+          box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
         }
 
         .plan-header {
@@ -530,18 +532,35 @@ export const DashboardMore: React.FC = () => {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 0.5rem;
-          padding: 1rem;
-          background: #f8f9fa;
-          border: 1px solid #e9ecef;
-          border-radius: 8px;
+          gap: 0.75rem;
+          padding: 1.25rem;
+          background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+          border: 2px solid #e2e8f0;
+          border-radius: 12px;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.3s ease;
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #1e293b;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .subscription-action-btn:hover {
-          background: rgba(245, 130, 32, 0.08);
-          border-color: #F58220;
+          background: linear-gradient(135deg, #F28C00 0%, #e6741d 100%);
+          border-color: #F28C00;
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(242, 140, 0, 0.25);
+        }
+
+        .subscription-action-btn .action-icon {
+          font-size: 1.5rem;
+          opacity: 0.8;
+        }
+
+        .subscription-action-btn:hover .action-icon {
+          opacity: 1;
+          transform: scale(1.1);
         }
 
         .no-subscription {
@@ -689,12 +708,31 @@ export const DashboardMore: React.FC = () => {
         .profile-card {
           display: flex;
           align-items: center;
-          gap: 1rem;
-          padding: 1.5rem;
-          background: linear-gradient(135deg, #003B71 0%, #0056a3 100%);
+          gap: 1.5rem;
+          padding: 2rem;
+          background: #F28C00;
           color: white;
-          border-radius: 12px;
-          margin-bottom: 1.5rem;
+          border-radius: 20px;
+          margin-bottom: 2rem;
+          box-shadow: 0 12px 32px rgba(242, 140, 0, 0.3);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .profile-card::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          right: -50%;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+          animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+          0%, 100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+          50% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
         }
 
         .profile-avatar {
@@ -702,26 +740,40 @@ export const DashboardMore: React.FC = () => {
         }
 
         .avatar-circle {
-          width: 60px;
-          height: 60px;
-          background: rgba(255, 255, 255, 0.2);
+          width: 90px;
+          height: 90px;
+          background: white;
+          border: 4px solid rgba(255, 255, 255, 0.4);
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.5rem;
+          font-size: 2.2rem;
           font-weight: 700;
+          color: #F28C00;
+          box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+          position: relative;
+          z-index: 2;
+        }
+
+        .profile-info {
+          position: relative;
+          z-index: 2;
         }
 
         .profile-info h3 {
-          margin: 0 0 0.25rem 0;
-          font-size: 1.2rem;
+          margin: 0 0 0.5rem 0;
+          font-size: 1.4rem;
+          font-weight: 700;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .profile-info p {
-          margin: 0 0 0.5rem 0;
-          opacity: 0.8;
-          font-size: 0.9rem;
+          margin: 0 0 0.75rem 0;
+          opacity: 0.9;
+          font-size: 1rem;
+          font-weight: 500;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         .status-badge {
@@ -732,8 +784,10 @@ export const DashboardMore: React.FC = () => {
         }
 
         .status-badge.verified {
-          background: rgba(16, 185, 129, 0.2);
+          background: white;
           color: #10b981;
+          font-weight: 700;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .profile-sections {
@@ -743,9 +797,11 @@ export const DashboardMore: React.FC = () => {
         }
 
         .profile-section {
-          background: #f8f9fa;
-          padding: 1rem;
-          border-radius: 8px;
+          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          padding: 1.5rem;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .profile-section h4 {
@@ -785,33 +841,49 @@ export const DashboardMore: React.FC = () => {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 0.5rem;
-          padding: 1rem;
-          background: #f8f9fa;
-          border: 1px solid #e9ecef;
-          border-radius: 8px;
+          gap: 0.75rem;
+          padding: 1.25rem;
+          background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+          border: 2px solid #e2e8f0;
+          border-radius: 12px;
           cursor: pointer;
-          transition: all 0.2s ease;
-          font-size: 0.8rem;
+          transition: all 0.3s ease;
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #1e293b;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .profile-action-btn:hover {
-          background: rgba(245, 130, 32, 0.08);
-          border-color: #F58220;
+          background: linear-gradient(135deg, #F28C00 0%, #e6741d 100%);
+          border-color: #F28C00;
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(242, 140, 0, 0.25);
         }
 
         .profile-action-btn.logout {
-          background: rgba(239, 68, 68, 0.05);
-          border-color: #fecaca;
+          background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+          border-color: #fca5a5;
           color: #dc2626;
         }
 
         .profile-action-btn.logout:hover {
-          background: rgba(239, 68, 68, 0.1);
+          background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+          border-color: #dc2626;
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
         }
 
         .action-icon {
-          font-size: 1.2rem;
+          font-size: 1.5rem;
+          opacity: 0.8;
+        }
+
+        .profile-action-btn:hover .action-icon {
+          opacity: 1;
+          transform: scale(1.1);
         }
 
         .empty-notifications {
