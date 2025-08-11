@@ -220,6 +220,14 @@ class ApiService {
       credentials: 'include', // Include cookies
     });
   }
+
+  async changePin(pinData: { currentPin: string; newPin: string }) {
+    return this.request('/api/v1/customer/change-pin', {
+      method: 'PUT',
+      body: JSON.stringify(pinData),
+      credentials: 'include', // Include cookies
+    });
+  }
 }
 
 export const apiService = new ApiService();

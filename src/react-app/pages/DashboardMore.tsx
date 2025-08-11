@@ -15,6 +15,7 @@ export const DashboardMore: React.FC = () => {
   // Profile data
   const [profileData, setProfileData] = useState<any>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showChangePinModal, setShowChangePinModal] = useState(false);
   const [editFormData, setEditFormData] = useState({
     firstName: '',
     lastName: '',
@@ -22,6 +23,12 @@ export const DashboardMore: React.FC = () => {
     dateOfBirth: '',
     email: ''
   });
+  const [pinFormData, setPinFormData] = useState({
+    currentPin: '',
+    newPin: '',
+    confirmPin: ''
+  });
+  const [pinError, setPinError] = useState('');
 
   useEffect(() => {
     loadTabData();
@@ -118,6 +125,53 @@ export const DashboardMore: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to update profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChangePin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPinError('');
+    
+    // Validate PIN format
+    if (pinFormData.currentPin.length !== 4 || !/^\d{4}$/.test(pinFormData.currentPin)) {
+      setPinError('Current PIN must be 4 digits');
+      return;
+    }
+    
+    if (pinFormData.newPin.length !== 4 || !/^\d{4}$/.test(pinFormData.newPin)) {
+      setPinError('New PIN must be 4 digits');
+      return;
+    }
+    
+    if (pinFormData.newPin !== pinFormData.confirmPin) {
+      setPinError('New PIN and Confirm PIN do not match');
+      return;
+    }
+    
+    if (pinFormData.currentPin === pinFormData.newPin) {
+      setPinError('New PIN must be different from current PIN');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const response = await apiService.changePin({
+        currentPin: pinFormData.currentPin,
+        newPin: pinFormData.newPin
+      });
+      
+      if (response.success) {
+        setShowChangePinModal(false);
+        setPinFormData({ currentPin: '', newPin: '', confirmPin: '' });
+        alert('PIN changed successfully!');
+      } else {
+        setPinError(response.message || 'Failed to change PIN');
+      }
+    } catch (error: any) {
+      setPinError(error.response?.data?.message || 'Failed to change PIN');
     } finally {
       setIsLoading(false);
     }
@@ -337,7 +391,7 @@ export const DashboardMore: React.FC = () => {
                 <span className="action-icon">✏️</span>
                 <span>Edit Profile</span>
               </button>
-              <button className="profile-action-btn">
+              <button className="profile-action-btn" onClick={() => setShowChangePinModal(true)}>
                 <span className="action-icon">🔒</span>
                 <span>Change PIN</span>
               </button>
@@ -472,6 +526,91 @@ export const DashboardMore: React.FC = () => {
                 </button>
                 <button type="submit" className="btn-save" disabled={isLoading}>
                   {isLoading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Change PIN Modal */}
+      {showChangePinModal && (
+        <div className="modal-overlay" onClick={() => setShowChangePinModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>🔒 Change PIN</h3>
+              <button className="close-btn" onClick={() => {
+                setShowChangePinModal(false);
+                setPinFormData({ currentPin: '', newPin: '', confirmPin: '' });
+                setPinError('');
+              }}>×</button>
+            </div>
+            
+            <form onSubmit={handleChangePin} className="edit-form">
+              {pinError && (
+                <div className="error-message">
+                  {pinError}
+                </div>
+              )}
+              
+              <div className="form-group">
+                <label>Current PIN *</label>
+                <input
+                  type="password"
+                  value={pinFormData.currentPin}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setPinFormData(prev => ({...prev, currentPin: value}));
+                    setPinError('');
+                  }}
+                  placeholder="Enter current 4-digit PIN"
+                  maxLength={4}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>New PIN *</label>
+                <input
+                  type="password"
+                  value={pinFormData.newPin}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setPinFormData(prev => ({...prev, newPin: value}));
+                    setPinError('');
+                  }}
+                  placeholder="Enter new 4-digit PIN"
+                  maxLength={4}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Confirm New PIN *</label>
+                <input
+                  type="password"
+                  value={pinFormData.confirmPin}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setPinFormData(prev => ({...prev, confirmPin: value}));
+                    setPinError('');
+                  }}
+                  placeholder="Confirm new 4-digit PIN"
+                  maxLength={4}
+                  required
+                />
+              </div>
+              
+              <div className="modal-actions">
+                <button type="button" className="btn-cancel" onClick={() => {
+                  setShowChangePinModal(false);
+                  setPinFormData({ currentPin: '', newPin: '', confirmPin: '' });
+                  setPinError('');
+                }}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-save" disabled={isLoading}>
+                  {isLoading ? 'Changing...' : 'Change PIN'}
                 </button>
               </div>
             </form>
@@ -1200,6 +1339,17 @@ export const DashboardMore: React.FC = () => {
         .btn-save:disabled {
           opacity: 0.6;
           cursor: not-allowed;
+        }
+
+        .error-message {
+          background: #fef2f2;
+          border: 1px solid #fecaca;
+          color: #dc2626;
+          padding: 0.75rem;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          margin-bottom: 1rem;
+          text-align: center;
         }
 
         @media (max-width: 480px) {
