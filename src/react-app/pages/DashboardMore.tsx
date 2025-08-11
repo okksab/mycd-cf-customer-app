@@ -58,24 +58,17 @@ export const DashboardMore: React.FC = () => {
                 subscriptionResponse.data.manualDriverSelection ? 'Manual driver selection' : 'Auto driver assignment'
               ];
               
-              // For Pay-As-You-Go plan (ID: 1), add flat service fee
+              // For Pay-As-You-Go plan (ID: 1), add service fee from plan price
               if (currentUserResponse.data.currentSubscriptionPlanId === 1) {
-                try {
-                  const settingsResponse = await apiService.getSettings('subscription_config');
-                  if (settingsResponse.success && settingsResponse.data.flat_service_fee) {
-                    features.push(`Flat Service Fee: ₹${settingsResponse.data.flat_service_fee}`);
-                  }
-                } catch (error) {
-                  console.log('Failed to load settings, using default fee');
-                  features.push('Flat Service Fee: ₹50');
-                }
+                features.push(`Service Fee: ₹${subscriptionResponse.data.price}`);
               }
               
               setCurrentPlan({
                 name: subscriptionResponse.data.planName,
                 price: subscriptionResponse.data.price,
                 validTill: currentUserResponse.data.subscriptionValidTill,
-                features: features
+                features: features,
+                isPayAsYouGo: currentUserResponse.data.currentSubscriptionPlanId === 1
               });
             } else {
               console.log('Failed to fetch subscription plan');
@@ -264,7 +257,12 @@ export const DashboardMore: React.FC = () => {
             <div className="plan-header">
               <div className="plan-info">
                 <h3>{currentPlan.name}</h3>
-                <div className="plan-price">₹{currentPlan.price}/month</div>
+                <div className="plan-price">
+                  {currentPlan.isPayAsYouGo 
+                    ? `₹${currentPlan.price} - Service Fee`
+                    : `₹${currentPlan.price}/month`
+                  }
+                </div>
               </div>
               <div className="plan-status active">Active</div>
             </div>
@@ -272,11 +270,15 @@ export const DashboardMore: React.FC = () => {
             <div className="plan-validity">
               <div className="validity-info">
                 <span className="validity-label">Valid till:</span>
-                <span className="validity-date">{formatDate(currentPlan.validTill)}</span>
+                <span className="validity-date">
+                  {currentPlan.isPayAsYouGo ? 'Unlimited' : formatDate(currentPlan.validTill)}
+                </span>
               </div>
-              <div className="days-remaining">
-                {getDaysRemaining(currentPlan.validTill)} days left
-              </div>
+              {!currentPlan.isPayAsYouGo && (
+                <div className="days-remaining">
+                  {getDaysRemaining(currentPlan.validTill)} days left
+                </div>
+              )}
             </div>
 
             <div className="plan-features">
