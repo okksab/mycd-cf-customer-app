@@ -289,8 +289,7 @@ export const DashboardMore: React.FC = () => {
             </div>
 
             <div className="plan-actions">
-              <button className="action-btn secondary">Change Plan</button>
-              <button className="action-btn primary">Renew Now</button>
+              <button className="action-btn primary" onClick={() => loadAvailablePlans()}>Change Plan</button>
             </div>
           </div>
 
