@@ -229,18 +229,43 @@ export const RecentRequestsCarousel = () => {
                     <div className="request-route">
                       <div className="route-point">
                         <span className="route-icon">📍</span>
-                        <span className="route-text">{request.from_location}</span>
+                        <span className="route-text">
+                          {(() => {
+                            const parts = request.from_location?.split(',').map(p => p.trim()) || [];
+                            return parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0] || request.from_location;
+                          })()}
+                        </span>
                       </div>
                       <div className="route-arrow">↓</div>
                       <div className="route-point">
                         <span className="route-icon">🎯</span>
-                        <span className="route-text">{request.to_location || 'Not specified'}</span>
+                        <span className="route-text">
+                          {request.to_location ? (() => {
+                            const parts = request.to_location?.split(',').map(p => p.trim()) || [];
+                            return parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0] || request.to_location;
+                          })() : 'Not specified'}
+                        </span>
                       </div>
                     </div>
                     
                     <div className="request-info">
                       <span className="request-id">#{request.request_id}</span>
                       <span className="service-type">{request.service_category_name || request.service_category}</span>
+                    </div>
+                    
+                    <div className="request-actions">
+                      <button 
+                        className="action-btn view-btn"
+                        onClick={() => navigate(`/booking-status/${request.request_id}`)}
+                      >
+                        👁️ View
+                      </button>
+                      <button 
+                        className="action-btn rate-btn"
+                        onClick={() => navigate(`/rate-trip/${request.request_id}`)}
+                      >
+                        ⭐ Rate
+                      </button>
                     </div>
                   </div>
                 )}
@@ -401,6 +426,43 @@ export const RecentRequestsCarousel = () => {
           font-size: 0.75rem;
           color: #F58220;
           font-weight: 500;
+        }
+
+        .request-actions {
+          display: flex;
+          gap: 0.25rem;
+          margin-top: 0.5rem;
+        }
+
+        .action-btn {
+          flex: 1;
+          padding: 0.4rem 0.5rem;
+          border: none;
+          border-radius: 4px;
+          font-size: 0.7rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .view-btn {
+          background: rgba(242, 140, 0, 0.1);
+          color: #F28C00;
+        }
+
+        .view-btn:hover {
+          background: #F28C00;
+          color: white;
+        }
+
+        .rate-btn {
+          background: rgba(242, 140, 0, 0.1);
+          color: #F28C00;
+        }
+
+        .rate-btn:hover {
+          background: #F28C00;
+          color: white;
         }
 
         .load-more-card {

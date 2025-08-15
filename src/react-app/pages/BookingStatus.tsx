@@ -6,6 +6,8 @@ export const BookingStatus: React.FC = () => {
   const [leadData, setLeadData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showFullFrom, setShowFullFrom] = useState(false);
+  const [showFullTo, setShowFullTo] = useState(false);
 
   useEffect(() => {
     // Extract requestId from URL
@@ -92,13 +94,6 @@ export const BookingStatus: React.FC = () => {
       <div className="booking-status">
       <div className="status-header">
         <h2>🚗 Booking Status</h2>
-        <div className="request-id">Request ID: {leadData.requestId}</div>
-        <div 
-          className="status-badge" 
-          style={{ backgroundColor: getStatusColor(leadData.status) }}
-        >
-          {getStatusText(leadData.status)}
-        </div>
       </div>
 
       <div className="status-content">
@@ -143,12 +138,48 @@ export const BookingStatus: React.FC = () => {
         <div className="status-section">
           <h3>📍 Your Trip</h3>
           <div className="detail-row">
+            <span className="label">Request ID:</span>
+            <span className="value">{leadData.requestId}</span>
+          </div>
+          <div className="detail-row">
             <span className="label">From:</span>
-            <span className="value">{leadData.fromLocation}</span>
+            <div className="location-value">
+              <span className="value">
+                {showFullFrom ? leadData.fromLocation : (() => {
+                  const parts = leadData.fromLocation?.split(',').map(p => p.trim()) || [];
+                  const cityName = parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0];
+                  return cityName;
+                })()}
+              </span>
+              {leadData.fromLocation?.includes(',') && (
+                <button 
+                  className="show-more-btn" 
+                  onClick={() => setShowFullFrom(!showFullFrom)}
+                >
+                  {showFullFrom ? 'Show Less' : 'Show More'}
+                </button>
+              )}
+            </div>
           </div>
           <div className="detail-row">
             <span className="label">To:</span>
-            <span className="value">{leadData.toLocation}</span>
+            <div className="location-value">
+              <span className="value">
+                {showFullTo ? leadData.toLocation : (() => {
+                  const parts = leadData.toLocation?.split(',').map(p => p.trim()) || [];
+                  const cityName = parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0];
+                  return cityName;
+                })()}
+              </span>
+              {leadData.toLocation?.includes(',') && (
+                <button 
+                  className="show-more-btn" 
+                  onClick={() => setShowFullTo(!showFullTo)}
+                >
+                  {showFullTo ? 'Show Less' : 'Show More'}
+                </button>
+              )}
+            </div>
           </div>
           <div className="detail-row">
             <span className="label">Service:</span>
@@ -202,7 +233,7 @@ export const BookingStatus: React.FC = () => {
         }
 
         .status-header h2 {
-          color: #003B71;
+          color: #F28C00;
           margin: 0 0 1rem 0;
         }
 
@@ -213,12 +244,30 @@ export const BookingStatus: React.FC = () => {
         }
 
         .status-badge {
-          display: inline-block;
-          padding: 0.5rem 1rem;
-          border-radius: 20px;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.75rem 1.5rem;
+          border-radius: 25px;
           color: white;
           font-weight: 600;
           font-size: 0.9rem;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          transition: all 0.3s ease;
+        }
+
+        .status-badge.pulsing {
+          animation: pulse 2s infinite;
+        }
+
+        .status-icon {
+          font-size: 1.1rem;
+        }
+
+        @keyframes pulse {
+          0% { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+          50% { box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4); }
+          100% { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         }
 
         .status-content {
@@ -233,15 +282,16 @@ export const BookingStatus: React.FC = () => {
           border-radius: 12px;
           padding: 1.5rem;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          border-left: 4px solid #F28C00;
         }
 
         .status-section h3 {
-          color: #1f2937;
+          color: #F28C00;
           font-size: 1.1rem;
           font-weight: 600;
           margin: 0 0 1rem 0;
           padding-bottom: 0.5rem;
-          border-bottom: 1px solid #e5e7eb;
+          border-bottom: 1px solid #F28C00;
         }
 
         .detail-row {
@@ -268,10 +318,33 @@ export const BookingStatus: React.FC = () => {
           text-align: right;
         }
 
+        .location-value {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.25rem;
+        }
+
+        .show-more-btn {
+          background: none;
+          border: none;
+          color: #F28C00;
+          font-size: 0.8rem;
+          cursor: pointer;
+          text-decoration: underline;
+          padding: 0;
+        }
+
+        .show-more-btn:hover {
+          color: #e6741d;
+        }
+
         .driver-info {
           display: flex;
-          gap: 1rem;
-          align-items: flex-start;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 1.5rem;
         }
 
         .driver-avatar {
@@ -283,11 +356,11 @@ export const BookingStatus: React.FC = () => {
           height: 80px;
           border-radius: 50%;
           object-fit: cover;
-          border: 3px solid #e5e7eb;
+          border: 3px solid #F28C00;
         }
 
         .driver-details {
-          flex: 1;
+          width: 100%;
         }
 
         .driver-status {
@@ -306,12 +379,18 @@ export const BookingStatus: React.FC = () => {
         .driver-btn {
           flex: 1;
           padding: 0.75rem 1rem;
-          border-radius: 8px;
+          border-radius: 10px;
           border: none;
           font-weight: 600;
           font-size: 0.9rem;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .driver-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .driver-btn:disabled {
@@ -320,21 +399,21 @@ export const BookingStatus: React.FC = () => {
         }
 
         .message-btn {
-          background: #3b82f6;
+          background: #F28C00;
           color: white;
         }
 
         .message-btn:hover:not(:disabled) {
-          background: #2563eb;
+          background: #e6741d;
         }
 
         .call-btn {
-          background: #10b981;
+          background: #F28C00;
           color: white;
         }
 
         .call-btn:hover:not(:disabled) {
-          background: #059669;
+          background: #e6741d;
         }
 
         .special-req {
@@ -356,12 +435,12 @@ export const BookingStatus: React.FC = () => {
           border: none;
           font-weight: 600;
           cursor: pointer;
-          background: #003B71;
+          background: #F28C00;
           color: white;
         }
 
         .status-actions button:hover {
-          background: #002a52;
+          background: #e6741d;
         }
 
         .loading {
@@ -421,14 +500,16 @@ export const BookingStatus: React.FC = () => {
             text-align: left;
           }
           
+          .location-value {
+            align-items: flex-start;
+          }
+          
           .status-actions {
             flex-direction: column;
           }
           
           .driver-info {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
+            gap: 1rem;
           }
           
           .driver-photo {
