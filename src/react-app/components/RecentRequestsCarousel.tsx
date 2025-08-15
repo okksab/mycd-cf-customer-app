@@ -22,8 +22,8 @@ export const RecentRequestsCarousel = () => {
 
 
 
-  // Display requests with Load More card
-  const displayRequests = [...recentRequests, { isLoadMore: true }];
+  // Display top 5 requests with Show All card
+  const displayRequests = [...recentRequests.slice(0, 5), { isLoadMore: true }];
 
   useEffect(() => {
     const loadRecentRequests = async () => {
@@ -219,38 +219,34 @@ export const RecentRequestsCarousel = () => {
                   </div>
                 ) : (
                   <div className="request-card">
-                    <div className="request-header">
-                      <div className={`request-status ${request.status}`}>
-                        {getStatusIcon(request.status)} {request.status.toUpperCase()}
-                      </div>
-                      <div className="request-date">{formatDate(request.created_at)}</div>
+                    <div className="request-row">
+                      <span className="label">Request ID:</span>
+                      <span className="value">#{request.request_id}</span>
                     </div>
                     
-                    <div className="request-route">
-                      <div className="route-point">
-                        <span className="route-icon">📍</span>
-                        <span className="route-text">
-                          {(() => {
-                            const parts = request.from_location?.split(',').map(p => p.trim()) || [];
-                            return parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0] || request.from_location;
-                          })()}
-                        </span>
-                      </div>
-                      <div className="route-arrow">↓</div>
-                      <div className="route-point">
-                        <span className="route-icon">🎯</span>
-                        <span className="route-text">
-                          {request.to_location ? (() => {
-                            const parts = request.to_location?.split(',').map(p => p.trim()) || [];
-                            return parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0] || request.to_location;
-                          })() : 'Not specified'}
-                        </span>
-                      </div>
+                    <div className="request-row">
+                      <span className="label">Request Date:</span>
+                      <span className="value">{formatDate(request.created_at)}</span>
                     </div>
                     
-                    <div className="request-info">
-                      <span className="request-id">#{request.request_id}</span>
-                      <span className="service-type">{request.service_category_name || request.service_category}</span>
+                    <div className="request-row">
+                      <span className="label">From:</span>
+                      <span className="value">
+                        {(() => {
+                          const parts = request.from_location?.split(',').map(p => p.trim()) || [];
+                          return parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0] || request.from_location;
+                        })()}
+                      </span>
+                    </div>
+                    
+                    <div className="request-row">
+                      <span className="label">To:</span>
+                      <span className="value">
+                        {request.to_location ? (() => {
+                          const parts = request.to_location?.split(',').map(p => p.trim()) || [];
+                          return parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0] || request.to_location;
+                        })() : 'Not specified'}
+                      </span>
                     </div>
                     
                     <div className="request-actions">
@@ -258,13 +254,13 @@ export const RecentRequestsCarousel = () => {
                         className="action-btn view-btn"
                         onClick={() => navigate(`/booking-status/${request.request_id}`)}
                       >
-                        👁️ View
+                        View
                       </button>
                       <button 
                         className="action-btn rate-btn"
                         onClick={() => navigate(`/rate-trip/${request.request_id}`)}
                       >
-                        ⭐ Rate
+                        Rate
                       </button>
                     </div>
                   </div>
@@ -349,109 +345,51 @@ export const RecentRequestsCarousel = () => {
 
         .request-card {
           background: white;
-          border-radius: 8px;
-          padding: 0.75rem;
-          border-left: 3px solid #F28C00;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-        }
-
-        .request-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 0.5rem;
-        }
-
-        .request-status {
-          padding: 0.2rem 0.5rem;
           border-radius: 10px;
-          font-size: 0.65rem;
-          font-weight: 600;
+          padding: 1rem;
+          border-left: 4px solid #F28C00;
+          border-right: 4px solid #F28C00;
+          box-shadow: 0 2px 12px rgba(242, 140, 0, 0.1);
+          transition: all 0.2s ease;
         }
 
-        .request-status.completed {
-          background: rgba(40, 167, 69, 0.1);
-          color: #28a745;
+        .request-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 20px rgba(242, 140, 0, 0.15);
         }
 
-        .request-status.pending {
-          background: rgba(255, 193, 7, 0.1);
-          color: #ffc107;
-        }
-
-        .request-status.cancelled {
-          background: rgba(220, 53, 69, 0.1);
-          color: #dc3545;
-        }
-
-        .request-date {
-          font-size: 0.75rem;
-          color: #666;
-        }
-
-        .request-route {
-          margin-bottom: 0.5rem;
-        }
-
-        .route-point {
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
-          margin-bottom: 0.2rem;
-        }
-
-        .route-icon {
-          font-size: 0.8rem;
-        }
-
-        .route-text {
-          font-size: 0.75rem;
-          color: #333;
-          flex: 1;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          font-weight: 500;
-        }
-
-        .route-arrow {
-          text-align: center;
-          color: #666;
-          font-size: 0.8rem;
-          margin: 0.25rem 0;
-        }
-
-        .request-info {
+        .request-row {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          margin-bottom: 0.5rem;
         }
 
-        .request-id {
-          font-size: 0.75rem;
+        .label {
+          font-size: 0.8rem;
           color: #666;
-          font-family: monospace;
+          font-weight: 600;
         }
 
-        .service-type {
-          font-size: 0.7rem;
-          color: #F28C00;
-          font-weight: 600;
+        .value {
+          font-size: 0.8rem;
+          color: #333;
+          font-weight: 500;
+          text-align: right;
         }
 
         .request-actions {
           display: flex;
-          gap: 0.25rem;
-          margin-top: 0.5rem;
+          gap: 0.5rem;
         }
 
         .action-btn {
           flex: 1;
-          padding: 0.4rem 0.5rem;
+          padding: 0.5rem 1rem;
           border: none;
-          border-radius: 4px;
-          font-size: 0.7rem;
-          font-weight: 500;
+          border-radius: 8px;
+          font-size: 0.8rem;
+          font-weight: 600;
           cursor: pointer;
           transition: all 0.2s ease;
         }
