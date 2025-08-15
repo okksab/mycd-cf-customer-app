@@ -22,6 +22,7 @@ export const BookingStatus: React.FC = () => {
       try {
         const response = await apiService.getLeadStatus(requestId);
         if (response.success) {
+          console.log('Lead data received:', response.data);
           setLeadData(response.data);
           setError(null);
         } else {
@@ -89,12 +90,6 @@ export const BookingStatus: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="booking-status">
-      <div className="logo-container">
-        <img src="/logo.png" alt="MyCallDriver" className="brand-logo" onError={(e) => {
-          (e.target as HTMLImageElement).style.display = 'none';
-        }} />
-      </div>
-
       <div className="status-header">
         <h2>🚗 Booking Status</h2>
         <div className="request-id">Request ID: {leadData.requestId}</div>
@@ -108,7 +103,45 @@ export const BookingStatus: React.FC = () => {
 
       <div className="status-content">
         <div className="status-section">
-          <h3>📍 Trip Details</h3>
+          <h3>🚗 Your Driver</h3>
+          <div className="driver-info">
+            <div className="driver-avatar">
+              <img 
+                src={leadData.assignedDriverId ? (leadData.driverProfilePicture || '/default-driver.png') : '/default-driver.png'} 
+                alt="Driver" 
+                className="driver-photo"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/default-driver.png';
+                }}
+              />
+            </div>
+            <div className="driver-details">
+              <div className="detail-row">
+                <span className="label">Driver Name:</span>
+                <span className="value">{leadData.assignedDriverId ? `${leadData.driverFirstName || 'Driver'} ${leadData.driverLastName || 'Assigned'}` : 'TBA - To Be Assigned'}</span>
+              </div>
+              <div className="detail-row">
+                <span className="label">Driver ID:</span>
+                <span className="value">{leadData.assignedDriverId ? (leadData.driverCode || leadData.assignedDriverId) : 'TBA - To Be Assigned'}</span>
+              </div>
+              <div className="detail-row">
+                <span className="label">Status:</span>
+                <span className="value driver-status">{getStatusText(leadData.status)}</span>
+              </div>
+              <div className="driver-actions">
+                <button className="driver-btn message-btn" disabled={!leadData.assignedDriverId}>
+                  💬 Message Driver
+                </button>
+                <button className="driver-btn call-btn" disabled={!leadData.assignedDriverId}>
+                  📞 Call Driver
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="status-section">
+          <h3>📍 Your Trip</h3>
           <div className="detail-row">
             <span className="label">From:</span>
             <span className="value">{leadData.fromLocation}</span>
@@ -128,13 +161,13 @@ export const BookingStatus: React.FC = () => {
         </div>
 
         <div className="status-section">
-          <h3>👤 Customer Details</h3>
+          <h3>👤 Booking Details</h3>
           <div className="detail-row">
-            <span className="label">Name:</span>
+            <span className="label">Customer:</span>
             <span className="value">{leadData.customerFirstName} {leadData.customerLastName}</span>
           </div>
           <div className="detail-row">
-            <span className="label">Mobile:</span>
+            <span className="label">Contact:</span>
             <span className="value">{leadData.mobileNumber}</span>
           </div>
         </div>
@@ -161,17 +194,6 @@ export const BookingStatus: React.FC = () => {
           max-width: 600px;
           margin: 0 auto;
           padding: 1rem;
-        }
-
-        .logo-container {
-          text-align: center;
-          margin-bottom: 2rem;
-        }
-
-        .brand-logo {
-          height: 60px;
-          max-width: 200px;
-          object-fit: contain;
         }
 
         .status-header {
@@ -244,6 +266,75 @@ export const BookingStatus: React.FC = () => {
         .detail-row .value {
           color: #1f2937;
           text-align: right;
+        }
+
+        .driver-info {
+          display: flex;
+          gap: 1rem;
+          align-items: flex-start;
+        }
+
+        .driver-avatar {
+          flex-shrink: 0;
+        }
+
+        .driver-photo {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 3px solid #e5e7eb;
+        }
+
+        .driver-details {
+          flex: 1;
+        }
+
+        .driver-status {
+          font-weight: 600;
+          color: #10b981;
+        }
+
+        .driver-actions {
+          display: flex;
+          gap: 0.75rem;
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid #e5e7eb;
+        }
+
+        .driver-btn {
+          flex: 1;
+          padding: 0.75rem 1rem;
+          border-radius: 8px;
+          border: none;
+          font-weight: 600;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .driver-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .message-btn {
+          background: #3b82f6;
+          color: white;
+        }
+
+        .message-btn:hover:not(:disabled) {
+          background: #2563eb;
+        }
+
+        .call-btn {
+          background: #10b981;
+          color: white;
+        }
+
+        .call-btn:hover:not(:disabled) {
+          background: #059669;
         }
 
         .special-req {
@@ -331,6 +422,21 @@ export const BookingStatus: React.FC = () => {
           }
           
           .status-actions {
+            flex-direction: column;
+          }
+          
+          .driver-info {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+          }
+          
+          .driver-photo {
+            width: 60px;
+            height: 60px;
+          }
+          
+          .driver-actions {
             flex-direction: column;
           }
         }
