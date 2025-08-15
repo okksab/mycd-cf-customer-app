@@ -108,11 +108,29 @@ export const BookingPreview: React.FC = () => {
           <h3>📍 Trip Details</h3>
           <div className="detail-row">
             <span className="label">From Location:</span>
-            <span className="value">{bookingData.fromLocation}</span>
+            <span className="value address-detail">
+              {bookingData.fromLocationDetails?.address || bookingData.fromLocation}
+              {bookingData.fromLocationDetails && (
+                <div className="address-meta">
+                  {bookingData.fromLocationDetails.city && `${bookingData.fromLocationDetails.city}, `}
+                  {bookingData.fromLocationDetails.state && `${bookingData.fromLocationDetails.state} `}
+                  {bookingData.fromLocationDetails.pincode && `- ${bookingData.fromLocationDetails.pincode}`}
+                </div>
+              )}
+            </span>
           </div>
           <div className="detail-row">
             <span className="label">To Location:</span>
-            <span className="value">{bookingData.toLocation}</span>
+            <span className="value address-detail">
+              {bookingData.toLocationDetails?.address || bookingData.toLocation}
+              {bookingData.toLocationDetails && (
+                <div className="address-meta">
+                  {bookingData.toLocationDetails.city && `${bookingData.toLocationDetails.city}, `}
+                  {bookingData.toLocationDetails.state && `${bookingData.toLocationDetails.state} `}
+                  {bookingData.toLocationDetails.pincode && `- ${bookingData.toLocationDetails.pincode}`}
+                </div>
+              )}
+            </span>
           </div>
         </div>
 
