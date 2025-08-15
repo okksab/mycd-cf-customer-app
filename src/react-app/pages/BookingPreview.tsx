@@ -61,7 +61,9 @@ export const BookingPreview: React.FC = () => {
         geo_pincode: bookingData.fromLocationDetails?.pincode || customerData.pincode || null,
         // Route calculations
         estimated_distance_km: bookingData.estimatedDistanceKm || null,
-        estimated_duration_min: bookingData.estimatedDurationMin || null
+        estimated_duration_min: bookingData.estimatedDurationMin || null,
+        // Ensure new booking gets current timestamp
+        created_at: new Date().toISOString()
       };
       
       // Create lead

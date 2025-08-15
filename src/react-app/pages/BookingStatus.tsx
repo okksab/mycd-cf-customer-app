@@ -8,6 +8,9 @@ export const BookingStatus: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showFullFrom, setShowFullFrom] = useState(false);
   const [showFullTo, setShowFullTo] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(15 * 60); // Start with full 15 minutes
+  const [isTimerActive, setIsTimerActive] = useState(true);
+  const [timerStartTime, setTimerStartTime] = useState<number | null>(null);
 
   useEffect(() => {
     // Extract requestId from URL
@@ -26,6 +29,30 @@ export const BookingStatus: React.FC = () => {
         if (response.success) {
           console.log('Lead data received:', response.data);
           setLeadData(response.data);
+          
+          // Calculate remaining time based on booking creation time
+          const bookingTime = new Date(response.data.createdAt).getTime();
+          const currentTime = new Date().getTime();
+          const timeDiff = Math.floor((currentTime - bookingTime) / 1000);
+          
+          // For very recent bookings or invalid dates, start fresh timer
+          let remainingTime;
+          if (isNaN(bookingTime) || timeDiff < 0 || timeDiff < 60) {
+            remainingTime = 15 * 60; // Fresh 15 minutes
+            // Set timer start time to current time for new bookings
+            if (!timerStartTime) {
+              setTimerStartTime(currentTime);
+            }
+          } else {
+            remainingTime = Math.max(0, (15 * 60) - timeDiff);
+            // Set timer start time to booking creation time
+            if (!timerStartTime) {
+              setTimerStartTime(bookingTime);
+            }
+          }
+          
+          setTimeLeft(remainingTime);
+          setIsTimerActive(remainingTime > 0);
           setError(null);
         } else {
           setError(response.message || 'Failed to fetch booking status');
@@ -43,6 +70,29 @@ export const BookingStatus: React.FC = () => {
     const interval = setInterval(fetchLeadStatus, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!isTimerActive || !timerStartTime) return;
+
+    const timer = setInterval(() => {
+      const currentTime = new Date().getTime();
+      const elapsed = Math.floor((currentTime - timerStartTime) / 1000);
+      const remaining = Math.max(0, (15 * 60) - elapsed);
+      
+      setTimeLeft(remaining);
+      
+      if (remaining <= 0) {
+        setIsTimerActive(false);
+        // Auto-confirm when timer expires
+        if (leadData && leadData.status !== 'CANCELLED_BY_CUSTOMER') {
+          handleAutoConfirm();
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isTimerActive, timerStartTime, leadData]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -64,7 +114,73 @@ export const BookingStatus: React.FC = () => {
       case 'CONVERTED_TO_TRIP': return 'Trip Started';
       case 'CANCELLED_BY_CUSTOMER': return 'Cancelled by You';
       case 'CANCELLED_BY_DRIVER': return 'Driver Cancelled';
+      case 'CONFIRMED': return 'Booking Confirmed';
+      case 'AUTO_CONFIRMED': return 'Auto Confirmed';
       default: return status.replace(/_/g, ' ');
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleCancel = async () => {
+    const cancellationCharge = !isTimerActive ? 25 : 0;
+    const message = cancellationCharge > 0 
+      ? `Are you sure you want to cancel this booking? A cancellation charge of ₹${cancellationCharge} will be deducted from your wallet.`
+      : 'Are you sure you want to cancel this booking?';
+      
+    if (window.confirm(message)) {
+      try {
+        // API call to cancel booking with charges
+        const cancelData = {
+          requestId: leadData.requestId,
+          cancellationCharge: cancellationCharge,
+          reason: 'CANCELLED_BY_CUSTOMER'
+        };
+        
+        console.log('Cancelling booking with charges:', cancelData);
+        
+        // Update booking status
+        setLeadData(prev => ({ ...prev, status: 'CANCELLED_BY_CUSTOMER' }));
+        setIsTimerActive(false);
+        
+        // Show confirmation message
+        if (cancellationCharge > 0) {
+          alert(`Booking cancelled. ₹${cancellationCharge} cancellation charge has been deducted from your wallet.`);
+        } else {
+          alert('Booking cancelled successfully.');
+        }
+        
+      } catch (error) {
+        console.error('Failed to cancel booking:', error);
+        alert('Failed to cancel booking. Please try again.');
+      }
+    }
+  };
+
+  const handleConfirm = async () => {
+    try {
+      // API call to confirm booking
+      console.log('Confirming booking:', leadData.requestId);
+      setLeadData(prev => ({ ...prev, status: 'CONFIRMED' }));
+      setIsTimerActive(false);
+      alert('Booking confirmed successfully!');
+    } catch (error) {
+      console.error('Failed to confirm booking:', error);
+    }
+  };
+
+  const handleAutoConfirm = async () => {
+    try {
+      // API call to auto-confirm booking
+      console.log('Auto-confirming booking:', leadData.requestId);
+      setLeadData(prev => ({ ...prev, status: 'AUTO_CONFIRMED' }));
+      alert('Your booking has been automatically confirmed!');
+    } catch (error) {
+      console.error('Failed to auto-confirm booking:', error);
     }
   };
 
@@ -101,14 +217,9 @@ export const BookingStatus: React.FC = () => {
           <h3>🚗 Your Driver</h3>
           <div className="driver-info">
             <div className="driver-avatar">
-              <img 
-                src={leadData.assignedDriverId ? (leadData.driverProfilePicture || '/default-driver.png') : '/default-driver.png'} 
-                alt="Driver" 
-                className="driver-photo"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/default-driver.png';
-                }}
-              />
+              <div className="driver-placeholder">
+                👤
+              </div>
             </div>
             <div className="driver-details">
               <div className="detail-row">
@@ -196,6 +307,88 @@ export const BookingStatus: React.FC = () => {
             <span className="label">Duration:</span>
             <span className="value">{leadData.serviceDuration}</span>
           </div>
+          
+          {/* Trip Timing Details */}
+          <div className="timing-section">
+            <div className="detail-row">
+              <span className="label">Trip Submitted:</span>
+              <span className="value">{leadData.createdAt ? new Date(leadData.createdAt).toLocaleString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : 'Just now'}</span>
+            </div>
+            {(leadData.status === 'CONFIRMED' || leadData.status === 'AUTO_CONFIRMED') && (
+              <div className="detail-row">
+                <span className="label">Confirmed At:</span>
+                <span className="value">{leadData.status === 'AUTO_CONFIRMED' ? 'Auto-confirmed after 15 minutes' : 'Manually confirmed'}</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Cancellation Window */}
+          {leadData.status !== 'CANCELLED_BY_CUSTOMER' && leadData.status !== 'COMPLETED' && (
+            <div className="cancellation-window">
+              <div className="timer-section">
+                {(leadData.status !== 'CONFIRMED' && leadData.status !== 'AUTO_CONFIRMED') ? (
+                  <>
+                    <div className="timer-info">
+                      <span className="timer-label">Free Cancellation Window:</span>
+                      <span className={`timer-display ${timeLeft <= 300 ? 'warning' : ''}`}>
+                        {isTimerActive ? formatTime(timeLeft) : '00:00'}
+                      </span>
+                    </div>
+                    {!isTimerActive && (
+                      <div className="timeout-notice">
+                        ⚠️ Cancellation will incur ₹25 charge
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="confirmed-notice">
+                    <div className="confirmed-status">
+                      ✅ Booking {leadData.status === 'AUTO_CONFIRMED' ? 'Auto-Confirmed' : 'Confirmed'}
+                    </div>
+                    <div className="cancellation-charge-notice">
+                      ⚠️ Cancellation will incur ₹25 charge
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="cancellation-actions">
+                <button 
+                  className="cancel-btn"
+                  onClick={handleCancel}
+                  disabled={leadData.status === 'CANCELLED_BY_CUSTOMER'}
+                >
+                  ❌ Cancel Request
+                </button>
+                {(leadData.status !== 'CONFIRMED' && leadData.status !== 'AUTO_CONFIRMED') && (
+                  <button 
+                    className="confirm-btn"
+                    onClick={handleConfirm}
+                    disabled={!isTimerActive || leadData.status === 'CANCELLED_BY_CUSTOMER'}
+                  >
+                    ✅ Confirm
+                  </button>
+                )}
+              </div>
+              
+              <div className="action-note">
+                {(leadData.status !== 'CONFIRMED' && leadData.status !== 'AUTO_CONFIRMED') ? (
+                  <>
+                    • <span className="cancel-text">Cancel</span>: Cancel the request<br />
+                    • <span className="confirm-text">Confirm</span>: Get the driver quickly
+                  </>
+                ) : (
+                  <>• <span className="cancel-text">Cancel Request</span>: Cancel confirmed booking (₹25 charge applies)</>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="status-section">
@@ -346,6 +539,159 @@ export const BookingStatus: React.FC = () => {
           color: #e6741d;
         }
 
+        .timing-section {
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid #e5e7eb;
+        }
+
+        .timing-section .detail-row {
+          border-bottom: none;
+          margin-bottom: 0.5rem;
+        }
+
+        .timing-section .label {
+          color: #F28C00;
+          font-weight: 600;
+        }
+
+        .cancellation-window {
+          margin-top: 1rem;
+          padding: 1rem;
+          background: rgba(242, 140, 0, 0.05);
+          border-radius: 8px;
+          border: 2px solid rgba(242, 140, 0, 0.2);
+        }
+
+        .timer-section {
+          margin-bottom: 1rem;
+        }
+
+        .timer-info {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.5rem;
+        }
+
+        .timer-label {
+          font-size: 0.9rem;
+          color: #F28C00;
+          font-weight: 600;
+        }
+
+        .timer-display {
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: #F28C00;
+          font-family: monospace;
+        }
+
+        .timer-display.warning {
+          color: #ef4444;
+          animation: pulse-timer 1s infinite;
+        }
+
+        .action-note {
+          font-size: 0.85rem;
+          color: #6b7280;
+          text-align: center;
+          margin: 0.75rem 0;
+          padding: 0.5rem;
+          background: rgba(242, 140, 0, 0.08);
+          border-radius: 6px;
+          font-style: italic;
+        }
+
+        .cancel-text {
+          color: #ef4444;
+          font-weight: 600;
+        }
+
+        .confirm-text {
+          color: #10b981;
+          font-weight: 600;
+        }
+
+        @keyframes pulse-timer {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
+        .timeout-notice {
+          font-size: 0.8rem;
+          color: #ef4444;
+          font-weight: 500;
+          text-align: center;
+          padding: 0.5rem;
+          background: rgba(239, 68, 68, 0.1);
+          border-radius: 4px;
+        }
+
+        .confirmed-notice {
+          text-align: center;
+        }
+
+        .confirmed-status {
+          font-size: 0.9rem;
+          color: #10b981;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+          padding: 0.5rem;
+          background: rgba(16, 185, 129, 0.1);
+          border-radius: 4px;
+        }
+
+        .cancellation-charge-notice {
+          font-size: 0.8rem;
+          color: #ef4444;
+          font-weight: 500;
+          padding: 0.5rem;
+          background: rgba(239, 68, 68, 0.1);
+          border-radius: 4px;
+        }
+
+        .cancellation-actions {
+          display: flex;
+          gap: 0.75rem;
+        }
+
+        .cancel-btn, .confirm-btn {
+          flex: 1;
+          padding: 0.75rem 1rem;
+          border: none;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .cancel-btn {
+          background: rgba(242, 140, 0, 0.1);
+          color: #F28C00;
+          border: 2px solid #F28C00;
+        }
+
+        .cancel-btn:hover:not(:disabled) {
+          background: #F28C00;
+          color: white;
+        }
+
+        .confirm-btn {
+          background: #F28C00;
+          color: white;
+        }
+
+        .confirm-btn:hover:not(:disabled) {
+          background: #e6741d;
+        }
+
+        .cancel-btn:disabled, .confirm-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
         .driver-info {
           display: flex;
           flex-direction: column;
@@ -364,6 +710,19 @@ export const BookingStatus: React.FC = () => {
           border-radius: 50%;
           object-fit: cover;
           border: 3px solid #F28C00;
+        }
+
+        .driver-placeholder {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: #f3f4f6;
+          border: 3px solid #F28C00;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 2rem;
+          color: #6b7280;
         }
 
         .driver-details {
