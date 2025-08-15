@@ -15,7 +15,7 @@ const getEnvironment = (): 'local' | 'test' | 'production' => {
 
 const environmentConfigs: Record<'local' | 'test' | 'production', EnvironmentConfig> = {
   local: {
-    apiBaseUrl: 'http://localhost:8081',
+    apiBaseUrl: 'http://localhost:8089',
     environment: 'local',
     debug: true,
     mockOTP: false,

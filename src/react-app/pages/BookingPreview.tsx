@@ -10,7 +10,11 @@ export const BookingPreview: React.FC = () => {
     // Get booking data from sessionStorage
     const data = sessionStorage.getItem('bookingPreviewData');
     if (data) {
-      setBookingData(JSON.parse(data));
+      const parsedData = JSON.parse(data);
+      console.log('Booking data:', parsedData);
+      console.log('From location details:', parsedData.fromLocationDetails);
+      console.log('To location details:', parsedData.toLocationDetails);
+      setBookingData(parsedData);
     } else {
       // Redirect back if no data
       window.location.href = '/dashboard';
@@ -35,11 +39,12 @@ export const BookingPreview: React.FC = () => {
         customer_first_name: customerData.firstName || 'Guest',
         customer_last_name: customerData.lastName || 'User',
         mobile_number: customerData.mobile || '',
-        from_location: bookingData.fromLocation,
-        to_location: bookingData.toLocation,
+        from_location: bookingData.fromLocationDetails?.address || bookingData.fromLocation,
+        to_location: bookingData.toLocationDetails?.address || bookingData.toLocation,
         service_type: bookingData.serviceType,
         service_category: bookingData.serviceCategory,
         service_subcategory: bookingData.serviceType,
+        service_subsubcategory: 'Standard',
         service_duration: bookingData.serviceDuration,
         duration: bookingData.selectedTiming === 'now' ? 'immediate' : 'scheduled',
         special_requirements: bookingData.specialRequirements || null,
@@ -47,9 +52,16 @@ export const BookingPreview: React.FC = () => {
         scheduled_time: bookingData.selectedTiming === 'scheduled' ? bookingData.scheduledTime : null,
         lead_type: bookingData.selectedTiming === 'now' ? 'INSTANT' : 'SCHEDULED',
         customer_id: customerData.customerId || null,
-        geo_state: customerData.state || null,
-        geo_city: customerData.city || null,
-        geo_pincode: customerData.pincode || null
+        // User's current location (from pickup location)
+        user_latitude: bookingData.fromLocationDetails?.lat || null,
+        user_longitude: bookingData.fromLocationDetails?.lng || null,
+        // Geographic details from pickup location
+        geo_state: bookingData.fromLocationDetails?.state || customerData.state || null,
+        geo_city: bookingData.fromLocationDetails?.city || customerData.city || null,
+        geo_pincode: bookingData.fromLocationDetails?.pincode || customerData.pincode || null,
+        // Route calculations
+        estimated_distance_km: bookingData.estimatedDistanceKm || null,
+        estimated_duration_min: bookingData.estimatedDurationMin || null
       };
       
       // Create lead
@@ -84,11 +96,6 @@ export const BookingPreview: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="booking-preview">
-      <div className="logo-container">
-        <img src="/logo.png" alt="MyCallDriver" className="brand-logo" onError={(e) => {
-          (e.target as HTMLImageElement).style.display = 'none';
-        }} />
-      </div>
       <div className="preview-header">
         <h2>📋 Review Your Booking Request</h2>
         <p>Please review all details before confirming your booking</p>
@@ -178,18 +185,6 @@ export const BookingPreview: React.FC = () => {
           padding: 1rem;
         }
 
-        .logo-container {
-          text-align: center;
-          margin-bottom: 2rem;
-          padding-top: 1rem;
-        }
-
-        .brand-logo {
-          height: 80px;
-          max-width: 300px;
-          object-fit: contain;
-        }
-
         .preview-header {
           text-align: center;
           margin-bottom: 2rem;
@@ -233,7 +228,7 @@ export const BookingPreview: React.FC = () => {
 
         .detail-row {
           display: flex;
-          justify-content: space-between;
+          flex-direction: column;
           margin-bottom: 0.75rem;
           padding-bottom: 0.75rem;
           border-bottom: 1px solid #f3f4f6;
@@ -248,15 +243,13 @@ export const BookingPreview: React.FC = () => {
         .detail-row .label {
           font-weight: 600;
           color: #6b7280;
-          flex-shrink: 0;
+          margin-bottom: 0.5rem;
         }
 
         .detail-row .value {
           color: #1f2937;
-          text-align: right;
-          flex: 1;
-          margin-left: 1rem;
           word-break: break-word;
+          line-height: 1.5;
         }
 
         .detail-row .value.special-req {
@@ -266,6 +259,21 @@ export const BookingPreview: React.FC = () => {
           background: #f9fafb;
           padding: 0.5rem;
           border-radius: 6px;
+        }
+
+        .detail-row .value.address-detail {
+          line-height: 1.4;
+        }
+
+        .address-meta {
+          font-size: 0.9rem;
+          color: #6b7280;
+          margin-top: 0.5rem;
+          font-weight: 500;
+          padding: 0.5rem;
+          background: #f8f9fa;
+          border-radius: 6px;
+          border-left: 3px solid #e9ecef;
         }
 
         .preview-actions {
@@ -344,10 +352,7 @@ export const BookingPreview: React.FC = () => {
             gap: 0.25rem;
           }
           
-          .detail-row .value {
-            text-align: left;
-            margin-left: 0;
-          }
+
           
           .preview-actions {
             flex-direction: column;

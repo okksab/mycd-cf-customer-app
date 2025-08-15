@@ -13,7 +13,11 @@ export const DashboardBook: React.FC = () => {
     serviceDuration: '',
     vehicleType: '',
     scheduledTime: '',
-    specialRequirements: ''
+    specialRequirements: '',
+    fromLocationDetails: null as any,
+    toLocationDetails: null as any,
+    estimatedDistanceKm: null as number | null,
+    estimatedDurationMin: null as number | null
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -75,6 +79,31 @@ export const DashboardBook: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const calculateRouteDetails = async (fromLocation: any, toLocation: any) => {
+    try {
+      // Simple distance calculation using Haversine formula
+      const R = 6371; // Earth's radius in kilometers
+      const dLat = (toLocation.lat - fromLocation.lat) * Math.PI / 180;
+      const dLng = (toLocation.lng - fromLocation.lng) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(fromLocation.lat * Math.PI / 180) * Math.cos(toLocation.lat * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const distance = Math.round(R * c * 100) / 100; // Round to 2 decimal places
+      
+      // Estimate duration based on distance (assuming average speed of 30 km/h in city)
+      const duration = Math.round((distance / 30) * 60); // Convert to minutes
+      
+      setFormData(prev => ({
+        ...prev,
+        estimatedDistanceKm: distance,
+        estimatedDurationMin: duration
+      }));
+    } catch (error) {
+      console.error('Error calculating route details:', error);
+    }
+  };
+
   return (
     <div className="dashboard-book">
       <div className="book-header">
@@ -92,6 +121,23 @@ export const DashboardBook: React.FC = () => {
             <GooglePlacesAutocomplete
               value={formData.fromLocation}
               onChange={(value) => handleInputChange('fromLocation', value)}
+              onPlaceSelected={(place) => {
+                console.log('From place selected:', place);
+                if (place) {
+                  const locationDetails = {
+                    address: place.formatted_address || formData.fromLocation,
+                    lat: place.geometry?.location?.lat(),
+                    lng: place.geometry?.location?.lng(),
+                    city: place.address_components?.find(c => c.types.includes('locality'))?.long_name,
+                    state: place.address_components?.find(c => c.types.includes('administrative_area_level_1'))?.long_name,
+                    state_code: place.address_components?.find(c => c.types.includes('administrative_area_level_1'))?.short_name,
+                    pincode: place.address_components?.find(c => c.types.includes('postal_code'))?.long_name,
+                    place_id: place.place_id
+                  };
+                  console.log('From location details:', locationDetails);
+                  setFormData(prev => ({ ...prev, fromLocationDetails: locationDetails }));
+                }
+              }}
               placeholder="Enter pickup location"
               className="form-input"
               required
@@ -103,6 +149,29 @@ export const DashboardBook: React.FC = () => {
             <GooglePlacesAutocomplete
               value={formData.toLocation}
               onChange={(value) => handleInputChange('toLocation', value)}
+              onPlaceSelected={(place) => {
+                console.log('To place selected:', place);
+                if (place) {
+                  const locationDetails = {
+                    address: place.formatted_address || formData.toLocation,
+                    lat: place.geometry?.location?.lat(),
+                    lng: place.geometry?.location?.lng(),
+                    city: place.address_components?.find(c => c.types.includes('locality'))?.long_name,
+                    state: place.address_components?.find(c => c.types.includes('administrative_area_level_1'))?.long_name,
+                    state_code: place.address_components?.find(c => c.types.includes('administrative_area_level_1'))?.short_name,
+                    pincode: place.address_components?.find(c => c.types.includes('postal_code'))?.long_name,
+                    place_id: place.place_id
+                  };
+                  console.log('To location details:', locationDetails);
+                  setFormData(prev => ({ ...prev, toLocationDetails: locationDetails }));
+                  
+                  // Calculate distance if both locations are available
+                  if (formData.fromLocationDetails?.lat && formData.fromLocationDetails?.lng && 
+                      locationDetails.lat && locationDetails.lng) {
+                    calculateRouteDetails(formData.fromLocationDetails, locationDetails);
+                  }
+                }
+              }}
               placeholder="Enter destination"
               className="form-input"
               required
