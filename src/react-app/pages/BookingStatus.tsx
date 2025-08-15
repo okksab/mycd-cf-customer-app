@@ -130,6 +130,13 @@ export const BookingStatus: React.FC = () => {
                 <button className="driver-btn call-btn" disabled={!leadData.assignedDriverId}>
                   📞 Call Driver
                 </button>
+                <button 
+                  className="driver-btn rate-btn" 
+                  disabled={leadData.status !== 'CONVERTED_TO_TRIP' && leadData.status !== 'COMPLETED'}
+                  onClick={() => window.location.href = `/rate-trip/${leadData.requestId}`}
+                >
+                  ⭐ Rate Trip
+                </button>
               </div>
             </div>
           </div>
@@ -370,22 +377,24 @@ export const BookingStatus: React.FC = () => {
 
         .driver-actions {
           display: flex;
-          gap: 0.75rem;
+          gap: 0.5rem;
           margin-top: 1rem;
           padding-top: 1rem;
           border-top: 1px solid #e5e7eb;
+          flex-wrap: wrap;
         }
 
         .driver-btn {
           flex: 1;
-          padding: 0.75rem 1rem;
-          border-radius: 10px;
+          padding: 0.6rem 0.8rem;
+          border-radius: 8px;
           border: none;
           font-weight: 600;
-          font-size: 0.9rem;
+          font-size: 0.8rem;
           cursor: pointer;
           transition: all 0.3s ease;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          min-width: 90px;
         }
 
         .driver-btn:hover:not(:disabled) {
@@ -413,6 +422,15 @@ export const BookingStatus: React.FC = () => {
         }
 
         .call-btn:hover:not(:disabled) {
+          background: #e6741d;
+        }
+
+        .rate-btn {
+          background: #F28C00;
+          color: white;
+        }
+
+        .rate-btn:hover:not(:disabled) {
           background: #e6741d;
         }
 

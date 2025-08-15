@@ -15,6 +15,7 @@ import { DashboardWallet } from './pages/DashboardWallet';
 import { BookingStatus } from './pages/BookingStatus';
 import { BookingPreview } from './pages/BookingPreview';
 import { CustomerHistory } from './pages/CustomerHistory';
+import { RateTrip } from './pages/RateTrip';
 import './styles/globals.css';
 
 // Protected Route Component
@@ -60,6 +61,7 @@ function App() {
             <Route path="/booking-status/:id" element={<BookingStatus />} />
             <Route path="/booking-preview" element={<BookingPreview />} />
             <Route path="/customer-history" element={<CustomerHistory />} />
+            <Route path="/rate-trip/:requestId" element={<RateTrip />} />
             
             {/* Protected Dashboard Routes */}
             <Route path="/dashboard" element={
