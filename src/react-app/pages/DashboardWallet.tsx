@@ -179,7 +179,7 @@ export const DashboardWallet: React.FC = () => {
         }
 
         .wallet-header h2 {
-          color: #003B71;
+          color: #F28C00;
           font-size: 1.5rem;
           font-weight: 700;
           margin: 0 0 0.5rem 0;
@@ -192,12 +192,12 @@ export const DashboardWallet: React.FC = () => {
         }
 
         .balance-card {
-          background: linear-gradient(135deg, #003B71 0%, #0056a3 100%);
+          background: linear-gradient(135deg, #F28C00 0%, #e6741d 100%);
           color: white;
           border-radius: 16px;
           padding: 2rem;
           margin-bottom: 2rem;
-          box-shadow: 0 8px 24px rgba(0, 59, 113, 0.2);
+          box-shadow: 0 8px 24px rgba(242, 140, 0, 0.2);
         }
 
         .balance-header {
@@ -251,7 +251,7 @@ export const DashboardWallet: React.FC = () => {
 
         .action-btn.primary {
           background: white;
-          color: #003B71;
+          color: #F28C00;
         }
 
         .action-btn.secondary {
@@ -348,7 +348,7 @@ export const DashboardWallet: React.FC = () => {
         }
 
         .recent-transactions h3 {
-          color: #1f2937;
+          color: #F28C00;
           font-size: 1.1rem;
           font-weight: 600;
           margin: 0;
@@ -440,9 +440,9 @@ export const DashboardWallet: React.FC = () => {
         }
 
         .view-all-btn:hover {
-          background: rgba(245, 130, 32, 0.08);
-          border-color: #F58220;
-          color: #F58220;
+          background: rgba(242, 140, 0, 0.08);
+          border-color: #F28C00;
+          color: #F28C00;
         }
 
         @media (max-width: 480px) {

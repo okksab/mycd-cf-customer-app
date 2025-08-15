@@ -151,44 +151,52 @@ export const DashboardHome: React.FC = () => {
             {/* Slide 2: Share with Friends */}
             {currentSlide === 1 && (
               <div className="share-section">
-                <div className="share-buttons">
-                  <button 
-                    className="share-btn whatsapp"
-                    onClick={() => {
-                      const message = "Hey! I found this amazing driver booking service. Try MyCallDriver.com - it's really convenient! Check it out: https://customer.mycalldriver.com";
-                      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-                    }}
-                  >
-                    <svg className="share-icon" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.893 3.488"/>
-                    </svg>
-                    <span>WhatsApp</span>
-                  </button>
-                  <button 
-                    className="share-btn facebook"
-                    onClick={() => {
-                      const url = "https://customer.mycalldriver.com";
-                      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-                    }}
-                  >
-                    <svg className="share-icon" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                    </svg>
-                    <span>Facebook</span>
-                  </button>
-                  <button 
-                    className="share-btn twitter"
-                    onClick={() => {
-                      const message = "Just discovered MyCallDriver.com - great for booking professional drivers! Check it out:";
-                      const url = "https://customer.mycalldriver.com";
-                      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}&url=${encodeURIComponent(url)}`, '_blank');
-                    }}
-                  >
-                    <svg className="share-icon" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                    </svg>
-                    <span>Twitter</span>
-                  </button>
+                <div className="share-content">
+                  <div className="share-buttons">
+                    <button 
+                      className="share-btn whatsapp"
+                      onClick={() => {
+                        const message = "Hey! I found this amazing driver booking service. Try MyCallDriver.com - it's really convenient! Check it out: https://customer.mycalldriver.com";
+                        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+                      }}
+                    >
+                      <div className="share-icon-wrapper">
+                        <svg className="share-icon" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.893 3.488"/>
+                        </svg>
+                      </div>
+                      <span>WhatsApp</span>
+                    </button>
+                    <button 
+                      className="share-btn facebook"
+                      onClick={() => {
+                        const url = "https://customer.mycalldriver.com";
+                        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+                      }}
+                    >
+                      <div className="share-icon-wrapper">
+                        <svg className="share-icon" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                      </div>
+                      <span>Facebook</span>
+                    </button>
+                    <button 
+                      className="share-btn twitter"
+                      onClick={() => {
+                        const message = "Just discovered MyCallDriver.com - great for booking professional drivers! Check it out:";
+                        const url = "https://customer.mycalldriver.com";
+                        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}&url=${encodeURIComponent(url)}`, '_blank');
+                      }}
+                    >
+                      <div className="share-icon-wrapper">
+                        <svg className="share-icon" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                        </svg>
+                      </div>
+                      <span>Twitter</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -247,6 +255,7 @@ export const DashboardHome: React.FC = () => {
 
       {/* Map Section */}
       <div className="map-section">
+        <h3>Your Location</h3>
         <div className="map-container">
           {!mapLoaded ? (
             <div className="map-placeholder">
@@ -281,16 +290,17 @@ export const DashboardHome: React.FC = () => {
         }
 
         .hero-cta-card {
-          background: #F58220;
+          background: linear-gradient(135deg, #F28C00 0%, #e6741d 100%);
           border-radius: 12px;
           padding: 1.5rem;
           position: relative;
           overflow: hidden;
-          box-shadow: 0 2px 8px rgba(245, 130, 32, 0.2);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          border: none;
           height: 280px;
           display: flex;
           flex-direction: column;
+          margin-bottom: 1rem;
         }
 
         .cta-content {
@@ -330,7 +340,7 @@ export const DashboardHome: React.FC = () => {
           align-items: center;
           justify-content: center;
           gap: 0.75rem;
-          background: #003B71;
+          background: rgba(255, 255, 255, 0.15);
           color: white;
           text-decoration: none;
           padding: 1rem 2rem;
@@ -338,14 +348,15 @@ export const DashboardHome: React.FC = () => {
           font-weight: 600;
           font-size: 1rem;
           transition: all 0.3s ease;
-          box-shadow: 0 4px 15px rgba(0, 59, 113, 0.3);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          backdrop-filter: blur(10px);
         }
 
         .hero-cta-button:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0, 59, 113, 0.4);
-          background: #002a52;
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+          background: rgba(255, 255, 255, 0.25);
         }
 
         .hero-cta-button::before {
@@ -387,54 +398,88 @@ export const DashboardHome: React.FC = () => {
           align-items: center;
         }
 
+        .share-content {
+          text-align: center;
+          width: 100%;
+        }
+
+
+
         .share-buttons {
           display: flex;
-          gap: 1rem;
+          gap: 0.75rem;
           justify-content: center;
+          align-items: flex-start;
         }
 
         .share-btn {
           display: flex;
           flex-direction: column;
           align-items: center;
+          justify-content: center;
           gap: 0.5rem;
-          padding: 1rem 0.75rem;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          border-radius: 12px;
+          padding: 0.75rem 0.5rem;
+          background: rgba(255, 255, 255, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          border-radius: 10px;
           color: white;
           cursor: pointer;
           transition: all 0.3s ease;
-          min-width: 80px;
+          width: 70px;
+          height: 80px;
           font-weight: 500;
-          font-size: 0.8rem;
+          font-size: 0.75rem;
+          backdrop-filter: blur(10px);
+          flex-shrink: 0;
+        }
+
+        .share-icon-wrapper {
+          width: 28px;
+          height: 28px;
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+          flex-shrink: 0;
         }
 
         .share-btn:hover {
-          background: rgba(255, 255, 255, 0.2);
-          transform: translateY(-2px);
+          background: rgba(255, 255, 255, 0.25);
+          transform: translateY(-3px);
           border-color: rgba(255, 255, 255, 0.4);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .share-btn:hover .share-icon-wrapper {
+          background: rgba(255, 255, 255, 0.3);
+          transform: scale(1.1);
         }
 
         .share-btn.whatsapp:hover {
-          background: rgba(37, 211, 102, 0.2);
-          border-color: rgba(37, 211, 102, 0.4);
+          background: rgba(37, 211, 102, 0.25);
+          border-color: rgba(37, 211, 102, 0.5);
+          box-shadow: 0 4px 15px rgba(37, 211, 102, 0.2);
         }
 
         .share-btn.facebook:hover {
-          background: rgba(24, 119, 242, 0.2);
-          border-color: rgba(24, 119, 242, 0.4);
+          background: rgba(24, 119, 242, 0.25);
+          border-color: rgba(24, 119, 242, 0.5);
+          box-shadow: 0 4px 15px rgba(24, 119, 242, 0.2);
         }
 
         .share-btn.twitter:hover {
-          background: rgba(29, 161, 242, 0.2);
-          border-color: rgba(29, 161, 242, 0.4);
+          background: rgba(29, 161, 242, 0.25);
+          border-color: rgba(29, 161, 242, 0.5);
+          box-shadow: 0 4px 15px rgba(29, 161, 242, 0.2);
         }
 
         .share-icon {
-          width: 24px;
-          height: 24px;
-          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+          width: 16px;
+          height: 16px;
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+          flex-shrink: 0;
         }
 
         .wallet-section {
@@ -478,9 +523,11 @@ export const DashboardHome: React.FC = () => {
         }
 
         .wallet-btn.primary {
-          background: #003B71;
+          background: rgba(255, 255, 255, 0.15);
           color: white;
-          box-shadow: 0 4px 15px rgba(0, 59, 113, 0.3);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          backdrop-filter: blur(10px);
         }
 
         .wallet-btn.secondary {
@@ -495,8 +542,8 @@ export const DashboardHome: React.FC = () => {
         }
 
         .wallet-btn.primary:hover {
-          box-shadow: 0 6px 20px rgba(0, 59, 113, 0.4);
-          background: #002a52;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+          background: rgba(255, 255, 255, 0.25);
         }
 
         .wallet-btn.secondary:hover {
@@ -540,8 +587,8 @@ export const DashboardHome: React.FC = () => {
         }
 
         .slide-nav-btn:hover {
-          background: rgba(0, 59, 113, 0.3);
-          border-color: rgba(0, 59, 113, 0.5);
+          background: rgba(255, 255, 255, 0.2);
+          border-color: rgba(255, 255, 255, 0.5);
           transform: scale(1.1);
         }
 
@@ -563,7 +610,7 @@ export const DashboardHome: React.FC = () => {
           right: -60px;
           width: 150px;
           height: 150px;
-          background: rgba(0, 59, 113, 0.1);
+          background: rgba(255, 255, 255, 0.08);
           border-radius: 50%;
         }
 
@@ -584,17 +631,17 @@ export const DashboardHome: React.FC = () => {
           padding: 1.5rem;
           margin-bottom: 1rem;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          border: none;
         }
 
         .map-container {
-          height: 300px;
+          height: 250px;
           background: #f8f9fa;
           border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
           position: relative;
-          margin-bottom: 1rem;
           z-index: 1;
         }
 
@@ -604,6 +651,21 @@ export const DashboardHome: React.FC = () => {
           border-radius: 8px;
           position: relative;
           z-index: 1;
+        }
+
+        .map-section h3 {
+          color: #F28C00;
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin: 0 0 1rem 0;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .map-section h3::before {
+          content: '🗺️';
+          font-size: 1.2rem;
         }
 
         .map-content {

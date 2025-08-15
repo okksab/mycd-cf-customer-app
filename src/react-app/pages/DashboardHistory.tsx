@@ -173,14 +173,20 @@ export const DashboardHistory: React.FC = () => {
                   <div className="location-item">
                     <span className="location-icon">📍</span>
                     <div>
-                      <strong>From:</strong> {booking.fromLocation}
+                      <strong>From:</strong> {(() => {
+                        const parts = booking.fromLocation?.split(',').map(p => p.trim()) || [];
+                        return parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0] || booking.fromLocation;
+                      })()}
                     </div>
                   </div>
                   {booking.toLocation && (
                     <div className="location-item">
                       <span className="location-icon">🎯</span>
                       <div>
-                        <strong>To:</strong> {booking.toLocation}
+                        <strong>To:</strong> {(() => {
+                          const parts = booking.toLocation?.split(',').map(p => p.trim()) || [];
+                          return parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0] || booking.toLocation;
+                        })()}
                       </div>
                     </div>
                   )}
@@ -217,7 +223,13 @@ export const DashboardHistory: React.FC = () => {
                   className="action-btn secondary"
                   onClick={() => window.location.href = `/booking-status/${booking.requestId}`}
                 >
-                  View
+                  👁️ View
+                </button>
+                <button 
+                  className="action-btn secondary"
+                  onClick={() => window.location.href = `/rate-trip/${booking.requestId}`}
+                >
+                  ⭐ Rate
                 </button>
                 <button 
                   className="action-btn primary"
@@ -236,9 +248,8 @@ export const DashboardHistory: React.FC = () => {
                     window.location.href = '/booking-preview';
                   }}
                 >
-                  Book Again
+                  🔁 Book Again
                 </button>
-                <button className="action-btn secondary">Support Request</button>
               </div>
             </div>
           ))
@@ -257,9 +268,9 @@ export const DashboardHistory: React.FC = () => {
         }
 
         .history-header h2 {
-          color: #003B71;
-          font-size: 1.5rem;
-          font-weight: 700;
+          color: #F28C00;
+          font-size: 1.3rem;
+          font-weight: 600;
           margin: 0 0 0.5rem 0;
         }
 
@@ -301,8 +312,8 @@ export const DashboardHistory: React.FC = () => {
         }
 
         .filter-tab:not(.active):hover {
-          color: #003B71;
-          background: rgba(0, 59, 113, 0.05);
+          color: #F28C00;
+          background: rgba(242, 140, 0, 0.05);
         }
 
         .bookings-list {
@@ -313,9 +324,10 @@ export const DashboardHistory: React.FC = () => {
 
         .booking-card {
           background: white;
-          border-radius: 12px;
-          padding: 1.5rem;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          border-radius: 8px;
+          padding: 1rem;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+          border-left: 3px solid #F28C00;
           transition: all 0.2s ease;
         }
 
@@ -327,12 +339,12 @@ export const DashboardHistory: React.FC = () => {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 1rem;
+          margin-bottom: 0.75rem;
         }
 
         .booking-info h3 {
-          color: #1f2937;
-          font-size: 1.1rem;
+          color: #F28C00;
+          font-size: 1rem;
           font-weight: 600;
           margin: 0 0 0.25rem 0;
         }
@@ -352,19 +364,19 @@ export const DashboardHistory: React.FC = () => {
         }
 
         .booking-details {
-          margin-bottom: 1rem;
+          margin-bottom: 0.75rem;
         }
 
         .location-info {
-          margin-bottom: 1rem;
+          margin-bottom: 0.75rem;
         }
 
         .location-item {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          margin-bottom: 0.5rem;
-          font-size: 0.9rem;
+          margin-bottom: 0.4rem;
+          font-size: 0.85rem;
           color: #374151;
         }
 
@@ -408,22 +420,23 @@ export const DashboardHistory: React.FC = () => {
         }
 
         .action-btn.primary {
-          background: #3b82f6;
+          background: #F28C00;
           color: white;
         }
 
         .action-btn.primary:hover {
-          background: #2563eb;
+          background: #e6741d;
         }
 
         .action-btn.secondary {
-          background: #f3f4f6;
-          color: #374151;
-          border: 1px solid #d1d5db;
+          background: rgba(242, 140, 0, 0.1);
+          color: #F28C00;
+          border: 1px solid rgba(242, 140, 0, 0.2);
         }
 
         .action-btn.secondary:hover {
-          background: #e5e7eb;
+          background: #F28C00;
+          color: white;
         }
 
         .action-btn.danger {

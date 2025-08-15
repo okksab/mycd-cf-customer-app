@@ -307,16 +307,25 @@ export const RecentRequestsCarousel = () => {
         .recent-requests {
           background: white;
           border-radius: 12px;
-          padding: 1rem;
+          padding: 1.5rem;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
           margin-bottom: 1rem;
+          border: none;
         }
 
         .recent-requests h3 {
           margin: 0 0 1rem 0;
-          color: #003B71;
+          color: #F28C00;
           font-size: 1.1rem;
           font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .recent-requests h3::before {
+          content: '📋';
+          font-size: 1.2rem;
         }
 
         .carousel-container {
@@ -339,23 +348,24 @@ export const RecentRequestsCarousel = () => {
         }
 
         .request-card {
-          background: #f8f9fa;
+          background: white;
           border-radius: 8px;
-          padding: 1rem;
-          border: 1px solid #e9ecef;
+          padding: 0.75rem;
+          border-left: 3px solid #F28C00;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.08);
         }
 
         .request-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.5rem;
         }
 
         .request-status {
-          padding: 0.25rem 0.5rem;
-          border-radius: 12px;
-          font-size: 0.7rem;
+          padding: 0.2rem 0.5rem;
+          border-radius: 10px;
+          font-size: 0.65rem;
           font-weight: 600;
         }
 
@@ -380,14 +390,14 @@ export const RecentRequestsCarousel = () => {
         }
 
         .request-route {
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.5rem;
         }
 
         .route-point {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          margin-bottom: 0.25rem;
+          gap: 0.4rem;
+          margin-bottom: 0.2rem;
         }
 
         .route-icon {
@@ -395,12 +405,13 @@ export const RecentRequestsCarousel = () => {
         }
 
         .route-text {
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           color: #333;
           flex: 1;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          font-weight: 500;
         }
 
         .route-arrow {
@@ -423,9 +434,9 @@ export const RecentRequestsCarousel = () => {
         }
 
         .service-type {
-          font-size: 0.75rem;
-          color: #F58220;
-          font-weight: 500;
+          font-size: 0.7rem;
+          color: #F28C00;
+          font-weight: 600;
         }
 
         .request-actions {
@@ -466,10 +477,10 @@ export const RecentRequestsCarousel = () => {
         }
 
         .load-more-card {
-          background: #F58220;
+          background: linear-gradient(135deg, #F28C00 0%, #e6741d 100%);
           color: white;
           border-radius: 8px;
-          padding: 2rem 1rem;
+          padding: 1.5rem 1rem;
           text-align: center;
           cursor: pointer;
           transition: all 0.3s ease;
@@ -477,13 +488,13 @@ export const RecentRequestsCarousel = () => {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          min-height: 120px;
+          min-height: 100px;
+          box-shadow: 0 2px 8px rgba(242, 140, 0, 0.2);
         }
 
         .load-more-card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(245, 130, 32, 0.3);
-          background: #e6741d;
+          box-shadow: 0 4px 15px rgba(242, 140, 0, 0.3);
         }
 
         .load-more-icon {
@@ -511,24 +522,25 @@ export const RecentRequestsCarousel = () => {
         }
 
         .carousel-btn {
-          background: #F58220;
+          background: #F28C00;
           color: white;
           border: none;
           border-radius: 50%;
-          width: 32px;
-          height: 32px;
+          width: 30px;
+          height: 30px;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          font-size: 1.2rem;
+          font-size: 1.1rem;
           transition: all 0.2s ease;
           font-family: inherit;
+          box-shadow: 0 2px 4px rgba(242, 140, 0, 0.2);
         }
 
         .carousel-btn:hover:not(:disabled) {
           background: #e6741d;
-          transform: scale(1.1);
+          transform: scale(1.05);
         }
 
         .carousel-btn:disabled {
@@ -552,7 +564,7 @@ export const RecentRequestsCarousel = () => {
         }
 
         .indicator.active {
-          background: #F58220;
+          background: #F28C00;
           transform: scale(1.2);
         }
       `}</style>
