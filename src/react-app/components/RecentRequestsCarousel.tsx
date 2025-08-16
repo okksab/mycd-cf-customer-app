@@ -201,105 +201,93 @@ export const RecentRequestsCarousel = () => {
 
   return (
     <div className="recent-requests">
-      <h3>Recent Requests</h3>
-      
-      <div className="carousel-container">
-        <div className="carousel-wrapper">
-          <div 
-            className="carousel-track" 
-            style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-          >
-            {displayRequests.map((request: any, index) => (
-              <div key={request.request_id || 'load-more'} className="carousel-slide">
-                {request.isLoadMore ? (
-                  <div className="load-more-card" onClick={goToHistory}>
-                    <div className="load-more-icon">📝</div>
-                    <div className="load-more-text">Load More</div>
-                    <div className="load-more-subtitle">View all requests</div>
-                  </div>
-                ) : (
-                  <div className="request-card">
-                    <div className="request-row">
-                      <span className="label">Request ID:</span>
-                      <span className="value">#{request.request_id}</span>
+        <h3>Recent Requests</h3>
+        
+        <div className="carousel-container">
+          <div className="carousel-wrapper">
+            <div 
+              className="carousel-track" 
+              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+            >
+              {displayRequests.map((request: any, index) => (
+                <div key={request.request_id || 'load-more'} className="carousel-slide">
+                  {request.isLoadMore ? (
+                    <div className="load-more-card" onClick={goToHistory}>
+                      <div className="load-more-icon">📝</div>
+                      <div className="load-more-text">Load More</div>
+                      <div className="load-more-subtitle">View all requests</div>
                     </div>
-                    
-                    <div className="request-row">
-                      <span className="label">Request Date:</span>
-                      <span className="value">{formatDate(request.created_at)}</span>
+                  ) : (
+                    <div className="request-card">
+                      <div className="request-row">
+                        <span className="label">Request ID:</span>
+                        <span className="value">#{request.request_id}</span>
+                      </div>
+                      
+                      <div className="request-row">
+                        <span className="label">Request Date:</span>
+                        <span className="value">{formatDate(request.created_at)}</span>
+                      </div>
+                      
+                      <div className="request-row">
+                        <span className="label">From:</span>
+                        <span className="value">
+                          {(() => {
+                            const parts = request.from_location?.split(',').map(p => p.trim()) || [];
+                            return parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0] || request.from_location;
+                          })()}
+                        </span>
+                      </div>
+                      
+                      <div className="request-row">
+                        <span className="label">To:</span>
+                        <span className="value">
+                          {request.to_location ? (() => {
+                            const parts = request.to_location?.split(',').map(p => p.trim()) || [];
+                            return parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0] || request.to_location;
+                          })() : 'Not specified'}
+                        </span>
+                      </div>
+                      
+                      <div className="request-actions">
+                        <button 
+                          className="action-btn view-btn"
+                          onClick={() => navigate(`/booking-status/${request.request_id}`)}
+                        >
+                          View
+                        </button>
+                        <button 
+                          className="action-btn rate-btn"
+                          onClick={() => navigate(`/rate-trip/${request.request_id}`)}
+                        >
+                          Rate
+                        </button>
+                      </div>
                     </div>
-                    
-                    <div className="request-row">
-                      <span className="label">From:</span>
-                      <span className="value">
-                        {(() => {
-                          const parts = request.from_location?.split(',').map(p => p.trim()) || [];
-                          return parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0] || request.from_location;
-                        })()}
-                      </span>
-                    </div>
-                    
-                    <div className="request-row">
-                      <span className="label">To:</span>
-                      <span className="value">
-                        {request.to_location ? (() => {
-                          const parts = request.to_location?.split(',').map(p => p.trim()) || [];
-                          return parts.find(p => p.match(/kumbakonam|chennai|bangalore|mumbai|delhi|hyderabad|pune|kolkata|coimbatore|madurai|salem|trichy/i)) || parts[parts.length - 3] || parts[0] || request.to_location;
-                        })() : 'Not specified'}
-                      </span>
-                    </div>
-                    
-                    <div className="request-actions">
-                      <button 
-                        className="action-btn view-btn"
-                        onClick={() => navigate(`/booking-status/${request.request_id}`)}
-                      >
-                        View
-                      </button>
-                      <button 
-                        className="action-btn rate-btn"
-                        onClick={() => navigate(`/rate-trip/${request.request_id}`)}
-                      >
-                        Rate
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
+          
+          {/* Left Navigation */}
+          {currentIndex > 0 && (
+            <div className="nav-area nav-left" onClick={prevSlide}>
+              <div className="nav-arrow">‹</div>
+            </div>
+          )}
+          
+          {/* Right Navigation */}
+          {currentIndex < displayRequests.length - 1 && (
+            <div className="nav-area nav-right" onClick={nextSlide}>
+              <div className="nav-arrow">›</div>
+            </div>
+          )}
         </div>
         
-        <div className="carousel-controls">
-          <button 
-            onClick={prevSlide}
-            disabled={currentIndex === 0}
-            className="carousel-btn prev-btn"
-          >
-            ‹
-          </button>
-          
-          <div className="carousel-indicators">
-            {displayRequests.map((_, index) => (
-              <span 
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`indicator ${currentIndex === index ? 'active' : ''}`}
-              />
-            ))}
-          </div>
-          
-          <button 
-            onClick={nextSlide}
-            disabled={currentIndex === displayRequests.length - 1}
-            className="carousel-btn next-btn"
-          >
-            ›
-          </button>
-        </div>
-      </div>
 
-      <style>{`
+      
+        <style>{`
         .recent-requests {
           background: white;
           border-radius: 12px;
@@ -326,6 +314,49 @@ export const RecentRequestsCarousel = () => {
 
         .carousel-container {
           position: relative;
+        }
+
+        .nav-area {
+          position: absolute;
+          top: 0;
+          width: 50px;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 20;
+          transition: all 0.3s ease;
+          background: rgba(242, 140, 0, 0.1);
+        }
+
+        .nav-left {
+          left: 0;
+          background: linear-gradient(90deg, rgba(242, 140, 0, 0.1) 0%, rgba(242, 140, 0, 0) 100%);
+          border-radius: 10px 0 0 10px;
+        }
+
+        .nav-right {
+          right: 0;
+          background: linear-gradient(90deg, rgba(242, 140, 0, 0) 0%, rgba(242, 140, 0, 0.1) 100%);
+          border-radius: 0 10px 10px 0;
+        }
+
+        .nav-area:hover {
+          background: rgba(242, 140, 0, 0.2);
+        }
+
+        .nav-arrow {
+          font-size: 2rem;
+          color: #F28C00;
+          font-weight: bold;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          transition: all 0.2s ease;
+        }
+
+        .nav-area:hover .nav-arrow {
+          transform: scale(1.2);
+          color: #e6741d;
         }
 
         .carousel-wrapper {
@@ -451,60 +482,9 @@ export const RecentRequestsCarousel = () => {
           opacity: 0.9;
         }
 
-        .carousel-controls {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-top: 1rem;
-          padding: 0 0.5rem;
-        }
 
-        .carousel-btn {
-          background: #F28C00;
-          color: white;
-          border: none;
-          border-radius: 50%;
-          width: 30px;
-          height: 30px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          font-size: 1.1rem;
-          transition: all 0.2s ease;
-          font-family: inherit;
-          box-shadow: 0 2px 4px rgba(242, 140, 0, 0.2);
-        }
 
-        .carousel-btn:hover:not(:disabled) {
-          background: #e6741d;
-          transform: scale(1.05);
-        }
 
-        .carousel-btn:disabled {
-          background: #ccc;
-          cursor: not-allowed;
-          transform: none;
-        }
-
-        .carousel-indicators {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .indicator {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: #ccc;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .indicator.active {
-          background: #F28C00;
-          transform: scale(1.2);
-        }
       `}</style>
     </div>
   );
